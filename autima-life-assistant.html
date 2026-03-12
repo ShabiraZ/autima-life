@@ -487,19 +487,17 @@
     </div>
   </div>
   <div class="header-right">
-    <div class="api-badge" id="api-badge" onclick="showSetup()">⚙ API Key</div>
   </div>
 </header>
 
 <!-- Setup Screen -->
 <div id="setup-screen">
   <div class="setup-card">
-    <div class="setup-icon">🌿</div>
+    <div class="setup-icon">🌱</div>
     <h2>Welcome to AutiMa.Life</h2>
-    <p>Your calm companion for navigating autism parenting. AutiMa.Life helps you log behavior episodes, detect triggers, and get guidance — all in a private, personal space.</p>
-    <input type="password" id="api-key-input" placeholder="sk-..." />
+    <p>Your calm companion for navigating autism parenting. Every step, together.</p>
     <button class="btn-primary" onclick="startApp()">Start Session</button>
-    <p class="setup-note">Your API key is stored only in this browser session and never sent anywhere except directly to OpenAI. Get a key at <strong>platform.openai.com</strong></p>
+    <p class="setup-note">AutiMa is an AI assistant — not a medical tool. Always consult your child's doctor or therapist for clinical decisions.</p>
   </div>
 </div>
 
@@ -649,14 +647,6 @@ Example of wrong formatting:
 
 
 function startApp() {
-  const key = document.getElementById('api-key-input').value.trim();
-  if (!key.startsWith('sk-')) {
-    alert('Please enter a valid OpenAI API key starting with sk-');
-    return;
-  }
-  apiKey = key;
-  document.getElementById('api-badge').textContent = '✓ Connected';
-  document.getElementById('api-badge').classList.add('connected');
   document.getElementById('setup-screen').style.display = 'none';
   document.getElementById('app-screen').style.display = 'flex';
   document.getElementById('app-screen').style.flexDirection = 'column';
@@ -664,7 +654,7 @@ function startApp() {
   const now = new Date();
   document.getElementById('session-meta').textContent = `Session started ${now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}`;
 
-  addMessage('ai', "Hi, I'm AutiMa.Life 🌿 I'm here to help you understand and navigate your child's behavior.\n\nYou can tell me what's happening right now, log something that just happened, or just talk through what's been a difficult day. What's on your mind?");
+  addMessage('ai', "Hi, I'm AutiMa 🌿 I'm here to help you navigate your child's day.\n\nYou can tell me what's happening right now, log something that just happened, or just talk through a difficult moment. What's on your mind?");
 }
 
 function showSetup() {
@@ -734,7 +724,7 @@ function removeTyping() {
 async function sendMessage(text) {
   const input = document.getElementById('user-input');
   const userText = text || input.value.trim();
-  if (!userText || !apiKey) return;
+  if (!userText) return;
 
   if (!text) input.value = '';
   input.style.height = 'auto';
@@ -745,20 +735,16 @@ async function sendMessage(text) {
   showTyping();
 
   try {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    const res = await fetch('/api/chat', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           ...messages
-        ],
-        max_tokens: 300,
-        temperature: 0.7
+        ]
       })
     });
 
@@ -766,7 +752,7 @@ async function sendMessage(text) {
     removeTyping();
 
     if (data.error) {
-      addMessage('ai', `⚠️ API Error: ${data.error.message}`);
+      addMessage('ai', `⚠️ Something went wrong. Please try again in a moment.`);
       return;
     }
 
@@ -776,7 +762,7 @@ async function sendMessage(text) {
 
   } catch (err) {
     removeTyping();
-    addMessage('ai', '⚠️ Could not connect. Please check your API key and internet connection.');
+    addMessage('ai', '⚠️ Could not connect. Please check your internet connection and try again.');
   }
 }
 
