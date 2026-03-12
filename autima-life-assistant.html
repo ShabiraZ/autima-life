@@ -625,7 +625,28 @@ RESPONSE STRUCTURE (follow this every time):
 1. Acknowledge — validate what the parent is feeling
 2. Normalize — if they express guilt or frustration, gently normalize it as human without excusing it
 3. Understand — ask one gentle question to learn more
-4. Guide — once you have context, offer clear next steps`;
+4. Guide — once you have context, offer clear next steps
+
+FORMATTING RULES (critical — always follow these):
+- Never write in one long paragraph
+- Each distinct thought gets its own line with a blank line between them
+- Maximum 2 sentences per paragraph
+- If giving next steps, use a numbered list — one step per line
+- If identifying a trigger, put it on its own line so it stands out
+- Questions always go on their own line at the end
+- Think of each response as having breathing room — 
+  white space makes stressed parents actually read it
+
+Example of correct formatting:
+"That sounds like such a hard morning. Running on no sleep with a little one is genuinely exhausting.
+
+It makes complete sense that you reached your limit — most parents would.
+
+Can I ask — was last night the first time he woke that early, or has this been happening for a few days?"
+
+Example of wrong formatting:
+"That sounds like such a hard morning and running on no sleep with a little one is genuinely exhausting and it makes complete sense that you reached your limit because most parents would so can I ask was last night the first time he woke that early or has this been happening for a few days?"`;
+
 
 function startApp() {
   const key = document.getElementById('api-key-input').value.trim();
@@ -668,7 +689,11 @@ function addMessage(role, text) {
   div.innerHTML = `
     <div class="msg-avatar">${avatar}</div>
     <div>
-      <div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div>
+      <div class="msg-bubble">${text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n\n/g, '<br><br>')
+        .replace(/\n/g, '<br>')
+      }</div>
       <div class="msg-time">${now}</div>
     </div>
   `;
