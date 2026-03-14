@@ -46,9 +46,3 @@ module.exports = async function handler(req, res) {
     });
   }
 }
-```
-
-Commit message:
-```
-Fix: Update chat.js to CommonJS syntax — resolves 
-FUNCTION_INVOCATION_FAILED on Vercel
