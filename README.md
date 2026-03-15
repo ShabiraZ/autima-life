@@ -1,4 +1,4 @@
-# 🌱 AutiMa.Life — Every Step, Together — Autism Parent Assistant
+# 🌱 AutiMa.Life — Every Step, Together
 
 > AutiMa = Autism + Ma (mother in Hindi) + Life
 > An AI-powered assistant helping parents navigate autism daily life —
@@ -32,26 +32,32 @@ the mothers (and fathers) living autism life every day.
 
 Idea validated through direct conversation with autism parents in Malaysia.
 
+## Live App
+
+🌐 [autima-life.vercel.app](https://autima-life.vercel.app)
+
 ## Roadmap
 
-✅ Phase 1 — AI Chat Prototype  
-⬜ Phase 2 — Behavior logging + session memory (Firebase)  
-⬜ Phase 3 — Trigger pattern detection across sessions  
-⬜ Phase 4 — PWA mobile install  
-⬜ Phase 5 — Specialist/therapist connect  
+✅ Phase 1 — AI chat prototype with trigger detection  
+✅ Phase 2 — Secure backend via Vercel (no API key needed for users)  
+⬜ Phase 3 — Behavior logging + session memory (Firebase)  
+⬜ Phase 4 — Trigger pattern detection across sessions  
+⬜ Phase 5 — PWA mobile install  
+⬜ Phase 6 — Specialist/therapist connect  
 
 ## Tech Stack
 
 - HTML / CSS / JavaScript (vanilla — no framework)
 - OpenAI GPT-4o-mini API
-- Hosted on GitHub Pages
+- Vercel serverless function (secure API proxy)
+- Hosted on Vercel
 
 ## How To Run Locally
 
-1. Download `autima-life-assistant.html`
+1. Download `index.html`
 2. Open in any browser
-3. Enter your OpenAI API key
-4. Start a session
+3. Click Start Session
+4. Start chatting — no API key needed
 
 ## Built By
 
@@ -61,3 +67,19 @@ Building in public. Real problem. Real people.
 ---
 *AutiMa.Life is an AI assistant. Not a medical tool.
 Always consult your child's therapist for clinical decisions.*
+```
+
+---
+
+Three things changed from your original:
+
+**1. Added live URL** — most important. Anyone visiting your GitHub can now click straight to the working app. This is what turns a GitHub repo into a portfolio piece.
+
+**2. Updated roadmap** — Phase 1 and 2 are now marked complete, and Vercel backend is correctly listed as its own milestone. Removing "GitHub Pages" since you've moved to Vercel.
+
+**3. Updated How To Run** — no more API key step since users don't need one anymore. Instructions now match the actual experience.
+
+Commit message:
+```
+Docs: Update README — add live URL, mark Phase 1 
+and 2 complete, update tech stack and instructions
