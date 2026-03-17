@@ -32,7 +32,8 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
 .w-note{font-size:11px;color:#A0B5AA;text-align:center;line-height:1.5;}
 
 /* APP SHELL */
-#app-screen{display:none;height:100vh;height:100dvh;flex-direction:column;background:var(--warm);}
+#as{display:none;height:100vh;height:100dvh;flex-direction:column;background:var(--warm);}
+.app-content-wrap{max-width:680px;width:100%;margin:0 auto;display:flex;flex-direction:column;flex:1;overflow:hidden;position:relative;}
 
 /* HEADER */
 .app-hdr{height:54px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;transition:background 0.3s;background:var(--deep);}
@@ -53,7 +54,9 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 
 /* CRISIS ANCHOR */
-.crisis-anch{background:linear-gradient(160deg,#B8672E,#D4956A);padding:20px 20px 18px;flex-shrink:0;position:relative;display:none;animation:fadeUp 0.3s ease;}
+.crisis-anch{background:linear-gradient(160deg,#B8672E,#D4956A);padding:16px 20px 14px;flex-shrink:0;position:relative;display:none;animation:fadeUp 0.3s ease;}
+@media(min-width:640px){.crisis-anch{padding:14px 24px 12px;}
+.ca-hl{font-size:18px;}}
 .ca-orb{width:38px;height:38px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:10px;}
 .ca-hl{font-family:'DM Serif Display',serif;font-size:22px;color:white;line-height:1.25;margin-bottom:6px;}
 .ca-sub{font-size:12px;color:rgba(255,255,255,0.72);line-height:1.5;}
@@ -95,7 +98,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
 .ins-text strong{color:var(--sage-light);}
 
 /* TRIAGE */
-.triage{padding:12px 16px 0;display:none;flex-direction:column;gap:8px;flex-shrink:0;}
+.triage{padding:12px 16px 16px;display:none;flex-direction:column;gap:8px;flex-shrink:0;}
 .tri-lbl{font-size:10px;color:#A0B5AA;letter-spacing:1px;text-transform:uppercase;text-align:center;margin-bottom:2px;}
 .tri-btn{display:flex;align-items:center;gap:12px;border-radius:16px;padding:14px 16px;cursor:pointer;border:none;width:100%;font-family:'DM Sans',sans-serif;text-align:left;transition:transform 0.1s;}
 .tri-btn:active{transform:scale(0.98);}
@@ -180,6 +183,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
     </div>
   </div>
 
+  <div class="app-content-wrap">
   <div class="crisis-anch" id="ca">
     <button class="ca-exit" onclick="exitCrisis()">Exit Crisis</button>
     <div class="ca-orb">🌿</div>
@@ -293,6 +297,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
     <button class="calm-btn" id="cb" onclick="exitCrisis()">😌 He's calming down — exit crisis</button>
     <div class="disc" id="disc">AI assistant · Not medical advice · ⓘ</div>
   </div>
+  </div><!-- end app-content-wrap -->
 </div>
 
 <script>
@@ -420,7 +425,7 @@ function addMsg(role,text){
   } else {
     d.innerHTML=`<div class="mav">🌿</div><div><div class="mbub">${fmt(text)}</div><div class="mtime">${t}</div></div>`;
   }
-  chat.appendChild(d); chat.scrollTop=chat.scrollHeight;
+  chat.appendChild(d); requestAnimationFrame(()=>{ chat.scrollTop=chat.scrollHeight; });
 
   const nm=text.match(/(?:his name is|her name is|my (?:son|daughter|child) (?:is )?(?:named )?)([A-Z][a-z]+)/i);
   if(nm&&role==='user'){
@@ -437,7 +442,7 @@ function showTyping(){
   const d=document.createElement('div');
   d.className=`msg ${mode==='crisis'?'crai':'ai'}`; d.id='ti';
   d.innerHTML=`<div class="mav">🌿</div><div class="mbub" style="padding:10px 14px"><div class="tdots"><span></span><span></span><span></span></div></div>`;
-  chat.appendChild(d); chat.scrollTop=chat.scrollHeight;
+  chat.appendChild(d); requestAnimationFrame(()=>{ chat.scrollTop=chat.scrollHeight; });
 }
 function removeTyping(){const t=$('ti');if(t)t.remove();}
 
