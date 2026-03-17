@@ -77,7 +77,8 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
 .msg.user{flex-direction:row-reverse;}
 .mav{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:2px;background:var(--sage-pale);}
 .msg.crai .mav{background:var(--amber-pale);}
-.mbub{max-width:78%;padding:12px 16px;border-radius:18px;font-size:14px;line-height:1.65;}
+.mbub{max-width:75%;padding:12px 16px;border-radius:18px;font-size:14px;line-height:1.65;}
+@media(max-width:640px){.mbub{max-width:88%;}}
 .msg.ai .mbub{background:var(--white);border:1px solid var(--border);border-top-left-radius:4px;color:var(--text);box-shadow:0 2px 8px rgba(44,62,53,0.05);}
 .msg.crai .mbub{background:var(--amber-pale);border:1.5px solid var(--amber-light);border-top-left-radius:4px;color:#7B4B2A;}
 .msg.user .mbub{background:var(--deep);color:var(--white);border-top-right-radius:4px;}
@@ -123,7 +124,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
 .lf-submit:hover{background:var(--mid);}
 
 /* LOG SUMMARY CARD */
-.sum-card{margin:12px 16px 0;background:var(--sage-pale);border:1px solid var(--border);border-radius:16px;padding:14px 16px;flex-shrink:0;display:none;animation:fadeUp 0.3s ease;}
+.sum-card{background:var(--sage-pale);border:1px solid var(--border);border-radius:16px;padding:14px 16px;flex-shrink:0;animation:fadeUp 0.3s ease;}
 .sum-title{font-size:12px;font-weight:600;color:var(--mid);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
 .sum-row{display:flex;gap:8px;margin-bottom:5px;font-size:13px;line-height:1.5;}
 .sum-lbl{color:var(--text-light);font-weight:500;min-width:110px;flex-shrink:0;}
@@ -282,9 +283,6 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
     </div>
   </div>
 
-  <!-- SUMMARY CARD (shown after log submitted) -->
-  <div class="sum-card" id="sc-card"></div>
-
   <div class="bot-bar" id="bb">
     <div class="inp-row" id="ir">
       <textarea id="user-input" rows="1"
@@ -331,11 +329,11 @@ function setMode(m){
   mode=m;
   const hdr=$('hdr'),ca=$('ca'),lb=$('lb'),ic=$('ic'),tri=$('tri'),lf=$('lf'),
         chat=$('chat'),ir=$('ir'),cb=$('cb'),disc=$('disc'),sb=$('sb'),
-        sdot=$('sdot'),inp=$('user-input'),bb=$('bb'),sc=$('sc-card');
+        sdot=$('sdot'),inp=$('user-input'),bb=$('bb');
 
   hdr.className='app-hdr';
   ca.style.display='none'; lb.style.display='none'; ic.style.display='none';
-  tri.style.display='none'; lf.style.display='none'; sc.style.display='none';
+  tri.style.display='none'; lf.style.display='none';
   chat.style.display='flex'; ir.classList.remove('cr-inp'); sb.classList.remove('cr-send');
   cb.style.display='none'; bb.classList.remove('cr-bar'); disc.classList.remove('cr-disc');
   sdot.classList.remove('amb'); inp.placeholder='Or just type what\'s on your mind…';
@@ -388,11 +386,15 @@ function submitLog(){
   if(filled.length<3){alert('Please select at least 3 fields to help AutiMa understand what happened.');return;}
 
   $('lf').style.display='none';
-  $('chat').style.display='flex';
+  const chat=$('chat');
+  chat.style.display='flex';
+  chat.innerHTML=''; // clear any previous messages
 
-  const sc=$('sc-card');
-  sc.style.display='block';
-  sc.innerHTML=`
+  // Inject summary card as first item INSIDE chat so it scrolls naturally
+  const sumDiv=document.createElement('div');
+  sumDiv.className='sum-card';
+  sumDiv.style.display='block';
+  sumDiv.innerHTML=`
     <div class="sum-title">📋 Moment Logged</div>
     ${what?`<div class="sum-row"><span class="sum-lbl">What happened</span><span class="sum-val">${what}</span></div>`:''}
     ${time?`<div class="sum-row"><span class="sum-lbl">Time of day</span><span class="sum-val">${time}</span></div>`:''}
@@ -400,6 +402,7 @@ function submitLog(){
     ${sleep?`<div class="sum-row"><span class="sum-lbl">Sleep</span><span class="sum-val">${sleep}</span></div>`:''}
     ${trigger?`<div class="sum-row"><span class="sum-lbl">Likely trigger</span><span class="sum-val">${trigger}</span></div>`:''}
   `;
+  chat.appendChild(sumDiv);
 
   const prompt=`LOG MODE — Parent submitted this structured log:
 - What happened: ${what||'Not specified'}
