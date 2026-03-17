@@ -2,786 +2,465 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AutiMa.Life — Autism Parent Assistant</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AutiMa.Life — Every Step, Together</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --sage: #7B9E87;
-    --sage-light: #A8C4B0;
-    --sage-pale: #E8F0EA;
-    --warm: #F5F0E8;
-    --amber: #D4956A;
-    --amber-light: #F2C9A8;
-    --deep: #2C3E35;
-    --mid: #4A6356;
-    --text: #2C3E35;
-    --text-light: #6B8577;
-    --white: #FDFCF9;
-    --border: #D6E4DA;
-    --shadow: 0 4px 24px rgba(44,62,53,0.08);
-  }
+:root {
+  --sage:#7B9E87; --sage-light:#A8C4B0; --sage-pale:#E8F0EA;
+  --warm:#F5F0E8; --amber:#D4956A; --amber-light:#F2C9A8; --amber-pale:#FFF3E0;
+  --deep:#2C3E35; --mid:#4A6356; --text:#2C3E35; --text-light:#6B8577;
+  --white:#FDFCF9; --border:#D6E4DA;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflow:hidden;}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+/* WELCOME */
+#ws{height:100vh;height:100dvh;background:var(--deep);display:flex;flex-direction:column;}
+.w-top{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 32px 32px;}
+.w-orb{width:80px;height:80px;background:radial-gradient(circle at 35% 35%,#A8C4B0,#4A6356);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:24px;box-shadow:0 12px 40px rgba(123,158,135,0.35);}
+.w-brand{font-family:'DM Serif Display',serif;font-size:36px;color:var(--white);margin-bottom:6px;text-align:center;}
+.w-tag{font-size:11px;color:var(--sage);letter-spacing:2px;text-transform:uppercase;margin-bottom:36px;}
+.w-feats{display:flex;flex-direction:column;gap:16px;width:100%;max-width:360px;}
+.w-feat{display:flex;align-items:center;gap:14px;}
+.w-ficon{width:40px;height:40px;background:rgba(123,158,135,0.15);border:1px solid rgba(123,158,135,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.w-ftext{font-size:14px;color:#8aab96;line-height:1.4;}
+.w-bot{background:var(--white);padding:28px 24px 32px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;}
+.w-cta{width:auto;min-width:200px;padding:15px 40px;background:var(--deep);color:var(--white);border:none;border-radius:50px;font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;letter-spacing:0.3px;transition:background 0.2s,transform 0.1s;margin-bottom:14px;}
+.w-cta:hover{background:var(--mid);}
+.w-cta:active{transform:scale(0.98);}
+.w-note{font-size:11px;color:#A0B5AA;text-align:center;line-height:1.5;}
 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--warm);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
+/* APP SHELL */
+#app-screen{display:none;height:100vh;height:100dvh;flex-direction:column;background:var(--warm);}
 
-  /* ── Header ── */
-  header {
-    background: var(--deep);
-    padding: 18px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
+/* HEADER */
+.app-hdr{height:54px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;transition:background 0.3s;background:var(--deep);}
+.app-hdr.crisis{background:#B8672E;}
+.app-hdr.log{background:var(--mid);}
+.hdr-l{display:flex;align-items:center;gap:9px;}
+.hdr-lm{width:28px;height:28px;background:var(--sage);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;transition:background 0.3s;}
+.crisis .hdr-lm{background:rgba(255,255,255,0.2);}
+.hdr-lt{font-family:'DM Serif Display',serif;font-size:18px;color:var(--white);}
+.hdr-sub{font-size:10px;color:var(--sage-light);text-transform:uppercase;letter-spacing:0.5px;margin-left:4px;}
+@media(max-width:480px){.hdr-sub{display:none;}}
+.cpill{display:flex;align-items:center;gap:6px;background:rgba(168,196,176,0.15);border:1px solid rgba(168,196,176,0.25);border-radius:20px;padding:5px 11px;transition:all 0.3s;}
+.crisis .cpill{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.2);}
+.cinit{width:18px;height:18px;background:var(--amber);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;color:white;font-weight:700;}
+.cname{font-size:11px;color:var(--sage-light);font-weight:500;}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--sage);animation:pulse 2s infinite;transition:background 0.3s;}
+.sdot.amb{background:var(--amber);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+/* CRISIS ANCHOR */
+.crisis-anch{background:linear-gradient(160deg,#B8672E,#D4956A);padding:20px 20px 18px;flex-shrink:0;position:relative;display:none;animation:fadeUp 0.3s ease;}
+.ca-orb{width:38px;height:38px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:10px;}
+.ca-hl{font-family:'DM Serif Display',serif;font-size:22px;color:white;line-height:1.25;margin-bottom:6px;}
+.ca-sub{font-size:12px;color:rgba(255,255,255,0.72);line-height:1.5;}
+.ca-exit{position:absolute;top:14px;right:16px;font-size:10px;color:rgba(255,255,255,0.65);background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);padding:5px 10px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;}
 
-  .logo-mark {
-    width: 36px;
-    height: 36px;
-    background: var(--sage);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-  }
+/* LOG BANNER */
+.log-ban{background:linear-gradient(135deg,var(--mid),#3a5446);padding:14px 20px;display:none;align-items:center;gap:10px;flex-shrink:0;}
+.lb-icon{font-size:18px;}
+.lb-title{font-size:13px;font-weight:600;color:white;}
+.lb-sub{font-size:10px;color:rgba(255,255,255,0.7);margin-top:1px;}
+.lb-done{margin-left:auto;font-size:11px;color:rgba(255,255,255,0.7);background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;}
 
-  .logo-text {
-    font-family: 'DM Serif Display', serif;
-    font-size: 22px;
-    color: var(--white);
-    letter-spacing: -0.3px;
-  }
+/* CHAT */
+.chat-area{flex:1;overflow-y:auto;padding:16px 16px 0;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth;}
+@media(min-width:640px){.chat-area{max-width:720px;width:100%;margin:0 auto;padding:20px 24px 0;}}
+.msg{display:flex;gap:10px;animation:fadeUp 0.25s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{flex-direction:row-reverse;}
+.mav{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:2px;background:var(--sage-pale);}
+.msg.crai .mav{background:var(--amber-pale);}
+.mbub{max-width:78%;padding:12px 16px;border-radius:18px;font-size:14px;line-height:1.65;}
+.msg.ai .mbub{background:var(--white);border:1px solid var(--border);border-top-left-radius:4px;color:var(--text);box-shadow:0 2px 8px rgba(44,62,53,0.05);}
+.msg.crai .mbub{background:var(--amber-pale);border:1.5px solid var(--amber-light);border-top-left-radius:4px;color:#7B4B2A;}
+.msg.user .mbub{background:var(--deep);color:var(--white);border-top-right-radius:4px;}
+.mtime{font-size:10px;color:var(--text-light);margin-top:4px;opacity:0.7;}
+.msg.ai .mtime,.msg.crai .mtime{text-align:left;}
+.msg.user .mtime{text-align:right;}
+.tdots{display:flex;gap:4px;padding:4px 0;align-items:center;}
+.tdots span{width:7px;height:7px;background:var(--sage);border-radius:50%;animation:bounce 1.2s infinite;}
+.tdots span:nth-child(2){animation-delay:0.2s}.tdots span:nth-child(3){animation-delay:0.4s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
 
-  .logo-sub {
-    font-size: 11px;
-    color: var(--sage-light);
-    font-weight: 400;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    margin-top: 1px;
-  }
+/* INSIGHT CARD */
+.ins-card{margin:12px 16px 0;background:linear-gradient(135deg,var(--deep),#1e2e27);border-radius:16px;padding:14px 16px;flex-shrink:0;display:none;}
+.ins-hdr{display:flex;align-items:center;gap:7px;margin-bottom:7px;}
+.ins-title{font-size:11px;font-weight:600;color:var(--sage-light);letter-spacing:0.3px;text-transform:uppercase;}
+.ins-badge{margin-left:auto;font-size:9px;color:var(--mid);background:rgba(123,158,135,0.15);padding:2px 7px;border-radius:6px;}
+.ins-text{font-size:12px;color:var(--text-light);line-height:1.5;}
+.ins-text strong{color:var(--sage-light);}
 
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+/* TRIAGE */
+.triage{padding:12px 16px 0;display:none;flex-direction:column;gap:8px;flex-shrink:0;}
+.tri-lbl{font-size:10px;color:#A0B5AA;letter-spacing:1px;text-transform:uppercase;text-align:center;margin-bottom:2px;}
+.tri-btn{display:flex;align-items:center;gap:12px;border-radius:16px;padding:14px 16px;cursor:pointer;border:none;width:100%;font-family:'DM Sans',sans-serif;text-align:left;transition:transform 0.1s;}
+.tri-btn:active{transform:scale(0.98);}
+.tri-cr{background:linear-gradient(135deg,#FFF3E0,#FDEBD0);border:1.5px solid var(--amber);}
+.tri-lg{background:linear-gradient(135deg,var(--sage-pale),#d8ecdf);border:1.5px solid var(--sage-light);}
+.tri-ic{font-size:22px;flex-shrink:0;}
+.tri-ttl{font-size:14px;font-weight:600;color:var(--deep);margin-bottom:2px;}
+.tri-sub{font-size:12px;color:var(--text-light);}
+.tri-arr{margin-left:auto;font-size:18px;color:#C0CEC8;}
 
-  .api-badge {
-    background: rgba(123,158,135,0.2);
-    border: 1px solid var(--sage);
-    border-radius: 20px;
-    padding: 5px 12px;
-    font-size: 12px;
-    color: var(--sage-light);
-    cursor: pointer;
-    transition: all 0.2s;
-  }
+/* LOG FORM — fields scroll, footer pinned */
+.log-form{display:none;flex-direction:column;flex:1;overflow:hidden;}
+.lf-fields{padding:16px 16px 8px;display:flex;flex-direction:column;gap:16px;overflow-y:auto;flex:1;}
+.lf-footer{padding:12px 16px 16px;background:var(--warm);border-top:1px solid var(--border);flex-shrink:0;}
+.lf-field{display:flex;flex-direction:column;gap:8px;}
+.lf-lbl{font-size:11px;font-weight:600;color:var(--mid);text-transform:uppercase;letter-spacing:0.5px;}
+.chips{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{padding:8px 14px;background:var(--white);border:1.5px solid var(--border);border-radius:20px;font-size:13px;color:var(--mid);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.15s;user-select:none;}
+.chip:hover{border-color:var(--sage);background:var(--sage-pale);}
+.chip.sel{background:var(--deep);border-color:var(--deep);color:white;}
+.lf-submit{width:100%;padding:15px;background:var(--deep);color:white;border:none;border-radius:14px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background 0.2s;}
+.lf-submit:hover{background:var(--mid);}
 
-  .api-badge:hover { background: rgba(123,158,135,0.35); }
-  .api-badge.connected { background: rgba(123,158,135,0.3); color: #A8C4B0; }
+/* LOG SUMMARY CARD */
+.sum-card{margin:12px 16px 0;background:var(--sage-pale);border:1px solid var(--border);border-radius:16px;padding:14px 16px;flex-shrink:0;display:none;animation:fadeUp 0.3s ease;}
+.sum-title{font-size:12px;font-weight:600;color:var(--mid);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.sum-row{display:flex;gap:8px;margin-bottom:5px;font-size:13px;line-height:1.5;}
+.sum-lbl{color:var(--text-light);font-weight:500;min-width:110px;flex-shrink:0;}
+.sum-val{color:var(--deep);font-weight:500;}
 
-  /* ── API Key Setup ── */
-  #setup-screen {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-  }
-
-  .setup-card {
-    background: var(--white);
-    border-radius: 20px;
-    padding: 48px;
-    max-width: 480px;
-    width: 100%;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
-    text-align: center;
-  }
-
-  .setup-icon {
-    width: 72px;
-    height: 72px;
-    background: var(--sage-pale);
-    border-radius: 50%;
-    margin: 0 auto 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-  }
-
-  .setup-card h2 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 26px;
-    color: var(--deep);
-    margin-bottom: 10px;
-  }
-
-  .setup-card p {
-    color: var(--text-light);
-    font-size: 14px;
-    line-height: 1.6;
-    margin-bottom: 28px;
-  }
-
-  .setup-card input {
-    width: 100%;
-    padding: 14px 18px;
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    font-size: 14px;
-    font-family: monospace;
-    color: var(--text);
-    background: var(--warm);
-    outline: none;
-    transition: border-color 0.2s;
-    margin-bottom: 14px;
-  }
-
-  .setup-card input:focus { border-color: var(--sage); }
-
-  .btn-primary {
-    width: 100%;
-    padding: 14px;
-    background: var(--deep);
-    color: var(--white);
-    border: none;
-    border-radius: 12px;
-    font-size: 15px;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    transition: background 0.2s, transform 0.1s;
-  }
-
-  .btn-primary:hover { background: var(--mid); }
-  .btn-primary:active { transform: scale(0.99); }
-
-  .setup-note {
-    margin-top: 16px;
-    font-size: 12px;
-    color: var(--text-light);
-    line-height: 1.5;
-  }
-
-  /* ── Main App ── */
-  #app-screen {
-    display: none;
-    flex: 1;
-    flex-direction: column;
-    max-width: 800px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 0 16px;
-  }
-
-  /* ── Child profile strip ── */
-  .child-strip {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 16px 20px;
-    margin: 20px 0 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: var(--shadow);
-  }
-
-  .child-info {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-
-  .child-avatar {
-    width: 44px;
-    height: 44px;
-    background: var(--amber-light);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-  }
-
-  .child-name {
-    font-weight: 600;
-    font-size: 15px;
-    color: var(--deep);
-  }
-
-  .child-meta {
-    font-size: 12px;
-    color: var(--text-light);
-    margin-top: 2px;
-  }
-
-  .status-pill {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--sage-pale);
-    border: 1px solid var(--sage-light);
-    border-radius: 20px;
-    padding: 6px 14px;
-    font-size: 12px;
-    color: var(--mid);
-    font-weight: 500;
-  }
-
-  .status-dot {
-    width: 7px;
-    height: 7px;
-    background: var(--sage);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
-  /* ── Quick log buttons ── */
-  .quick-log {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-  }
-
-  .quick-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    background: var(--white);
-    border: 1.5px solid var(--border);
-    border-radius: 20px;
-    font-size: 13px;
-    color: var(--mid);
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
-    transition: all 0.2s;
-  }
-
-  .quick-btn:hover {
-    border-color: var(--sage);
-    background: var(--sage-pale);
-    color: var(--deep);
-  }
-
-  /* ── Chat window ── */
-  #chat-window {
-    flex: 1;
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 24px;
-    overflow-y: auto;
-    min-height: 300px;
-    max-height: 52vh;
-    box-shadow: var(--shadow);
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    scroll-behavior: smooth;
-  }
-
-  /* ── Messages ── */
-  .msg {
-    display: flex;
-    gap: 12px;
-    animation: fadeUp 0.3s ease;
-  }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  .msg.user { flex-direction: row-reverse; }
-
-  .msg-avatar {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-
-  .msg.ai .msg-avatar { background: var(--sage-pale); }
-  .msg.user .msg-avatar { background: var(--amber-light); }
-
-  .msg-bubble {
-    max-width: 75%;
-    padding: 14px 18px;
-    border-radius: 16px;
-    font-size: 14px;
-    line-height: 1.65;
-  }
-
-  .msg.ai .msg-bubble {
-    background: var(--sage-pale);
-    border: 1px solid var(--border);
-    border-top-left-radius: 4px;
-    color: var(--text);
-  }
-
-  .msg.user .msg-bubble {
-    background: var(--deep);
-    color: var(--white);
-    border-top-right-radius: 4px;
-  }
-
-  .msg-time {
-    font-size: 11px;
-    color: var(--text-light);
-    margin-top: 4px;
-    text-align: right;
-  }
-
-  .msg.ai .msg-time { text-align: left; }
-
-  /* Typing indicator */
-  .typing-dots {
-    display: flex;
-    gap: 4px;
-    padding: 6px 0;
-    align-items: center;
-  }
-
-  .typing-dots span {
-    width: 7px;
-    height: 7px;
-    background: var(--sage);
-    border-radius: 50%;
-    animation: bounce 1.2s infinite;
-  }
-
-  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-
-  @keyframes bounce {
-    0%, 80%, 100% { transform: translateY(0); }
-    40% { transform: translateY(-6px); }
-  }
-
-  /* Trigger alert */
-  .trigger-alert {
-    background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
-    border: 1.5px solid var(--amber);
-    border-radius: 12px;
-    padding: 12px 16px;
-    font-size: 13px;
-    color: #7B4B2A;
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    line-height: 1.5;
-    animation: fadeUp 0.3s ease;
-  }
-
-  .trigger-alert .alert-icon { font-size: 18px; flex-shrink: 0; }
-
-  /* ── Input bar ── */
-  .input-bar {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 14px 16px;
-    margin: 14px 0 20px;
-    display: flex;
-    align-items: flex-end;
-    gap: 12px;
-    box-shadow: var(--shadow);
-  }
-
-  #user-input {
-    flex: 1;
-    border: none;
-    outline: none;
-    font-size: 14px;
-    font-family: 'DM Sans', sans-serif;
-    color: var(--text);
-    background: transparent;
-    resize: none;
-    min-height: 22px;
-    max-height: 120px;
-    line-height: 1.5;
-  }
-
-  #user-input::placeholder { color: #A0B5AA; }
-
-  .send-btn {
-    width: 40px;
-    height: 40px;
-    background: var(--deep);
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s, transform 0.1s;
-    flex-shrink: 0;
-  }
-
-  .send-btn:hover { background: var(--mid); }
-  .send-btn:active { transform: scale(0.95); }
-
-  .send-btn svg { fill: white; }
-
-  /* ── Disclaimer ── */
-  .disclaimer {
-    text-align: center;
-    font-size: 11px;
-    color: var(--text-light);
-    padding-bottom: 12px;
-    line-height: 1.5;
-  }
-
-  /* ── Responsive ── */
-  @media (max-width: 600px) {
-    .setup-card { padding: 32px 24px; }
-    .child-strip { flex-direction: column; align-items: flex-start; gap: 10px; }
-    #chat-window { max-height: 44vh; }
-    .msg-bubble { max-width: 88%; }
-  }
+/* BOTTOM BAR */
+.bot-bar{background:var(--white);border-top:1px solid var(--border);padding:12px 16px 16px;flex-shrink:0;transition:background 0.3s,border-color 0.3s;}
+.bot-bar.cr-bar{background:#FFF9F5;border-top-color:var(--amber-light);}
+.inp-row{display:flex;align-items:flex-end;gap:10px;background:var(--warm);border-radius:24px;padding:10px 10px 10px 16px;transition:background 0.3s;}
+.inp-row.cr-inp{background:var(--amber-pale);border:1px solid var(--amber-light);}
+#user-input{flex:1;border:none;outline:none;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);background:transparent;resize:none;min-height:22px;max-height:100px;line-height:1.5;}
+#user-input::placeholder{color:#A0B5AA;}
+.send{width:36px;height:36px;background:var(--deep);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity 0.2s,transform 0.1s;}
+.send.cr-send{background:var(--amber);}
+.send:hover{opacity:0.85;}
+.send:active{transform:scale(0.93);}
+.send svg{fill:white;}
+.calm-btn{width:100%;padding:11px;background:transparent;border:1.5px solid var(--amber);border-radius:12px;font-size:12px;font-weight:600;color:var(--amber);font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:10px;transition:background 0.2s;display:none;}
+.calm-btn:hover{background:var(--amber-pale);}
+.disc{font-size:10px;color:#C0CEC8;text-align:center;padding-top:8px;}
+.disc.cr-disc{color:rgba(212,149,106,0.5);}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">
-    <div class="logo-mark">🌿</div>
-    <div>
-      <div class="logo-text">AutiMa.Life</div>
-      <div class="logo-sub">Every Step, Together — Autism Parent Assistant</div>
+<!-- WELCOME -->
+<div id="ws">
+  <div class="w-top">
+    <div class="w-orb">🌿</div>
+    <div class="w-brand">AutiMa.Life</div>
+    <div class="w-tag">Every Step, Together</div>
+    <div class="w-feats">
+      <div class="w-feat"><div class="w-ficon">🧩</div><div class="w-ftext">Understand what triggered the meltdown</div></div>
+      <div class="w-feat"><div class="w-ficon">📋</div><div class="w-ftext">Log episodes and track patterns over time</div></div>
+      <div class="w-feat"><div class="w-ficon">🌿</div><div class="w-ftext">Get calm guidance when you need it most</div></div>
+      <div class="w-feat"><div class="w-ficon">💛</div><div class="w-ftext">Built by a parent, for parents</div></div>
     </div>
   </div>
-  <div class="header-right">
-  </div>
-</header>
-
-<!-- Setup Screen -->
-<div id="setup-screen">
-  <div class="setup-card">
-    <div class="setup-icon">🌱</div>
-    <h2>Welcome to AutiMa.Life</h2>
-    <p>Your calm companion for navigating autism parenting. Every step, together.</p>
-    <button class="btn-primary" onclick="startApp()">Start Session</button>
-    <p class="setup-note">AutiMa is an AI assistant — not a medical tool. Always consult your child's doctor or therapist for clinical decisions.</p>
+  <div class="w-bot">
+    <button class="w-cta" onclick="startApp()">I'm Ready — Let's Begin</button>
+    <div class="w-note">AI assistant · Not a medical tool · Always consult your child's therapist</div>
   </div>
 </div>
 
-<!-- Main App -->
-<div id="app-screen">
-  <!-- Child profile -->
-  <div class="child-strip">
-    <div class="child-info">
-      <div class="child-avatar">👦</div>
-      <div>
-        <div class="child-name" id="child-display-name">Your Child</div>
-        <div class="child-meta" id="session-meta">Session started — logging active</div>
-      </div>
+<!-- APP -->
+<div id="as">
+  <div class="app-hdr" id="hdr">
+    <div class="hdr-l">
+      <div class="hdr-lm">🌿</div>
+      <div class="hdr-lt">AutiMa.Life</div>
+      <div class="hdr-sub">Every Step, Together</div>
     </div>
-    <div class="status-pill">
-      <div class="status-dot"></div>
-      AI listening
+    <div class="cpill">
+      <div class="cinit" id="cinit">Y</div>
+      <div class="cname" id="cname">Your Child</div>
+      <div class="sdot" id="sdot"></div>
     </div>
   </div>
 
-  <!-- Quick log -->
-  <div class="quick-log">
-    <button class="quick-btn" onclick="quickLog('🍽️ Fed him just now')">🍽️ Just ate</button>
-    <button class="quick-btn" onclick="quickLog('😴 Woke up about an hour ago')">😴 Just woke</button>
-    <button class="quick-btn" onclick="quickLog('📱 Been on screen for a while')">📱 Screen time</button>
-    <button class="quick-btn" onclick="quickLog('🏥 Had therapy today')">🏥 Had therapy</button>
-    <button class="quick-btn" onclick="quickLog('😤 He is having a tantrum right now')">😤 Tantrum now</button>
+  <div class="crisis-anch" id="ca">
+    <button class="ca-exit" onclick="exitCrisis()">Exit Crisis</button>
+    <div class="ca-orb">🌿</div>
+    <div class="ca-hl">Breathe.<br>I'm right here with you.</div>
+    <div class="ca-sub">You're not alone in this moment. Let's work through it together.</div>
   </div>
 
-  <!-- Chat -->
-  <div id="chat-window"></div>
+  <div class="log-ban" id="lb">
+    <div class="lb-icon">📋</div>
+    <div><div class="lb-title">Logging a Moment</div><div class="lb-sub">Tap to select, then submit for AI analysis</div></div>
+    <button class="lb-done" onclick="exitLog()">Done</button>
+  </div>
 
-  <!-- Input -->
-  <div class="input-bar">
-    <textarea id="user-input" rows="1" placeholder="Tell me what's happening with your child…" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
-    <button class="send-btn" onclick="sendMessage()">
-      <svg width="16" height="16" viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+  <div class="chat-area" id="chat"></div>
+
+  <div class="ins-card" id="ic">
+    <div class="ins-hdr">
+      <span style="font-size:14px;">🔔</span>
+      <div class="ins-title">Pattern Tracking</div>
+      <div class="ins-badge">Coming Soon</div>
+    </div>
+    <div class="ins-text">AutiMa.Life will detect patterns across sessions and <strong>warn you before triggers strike.</strong></div>
+  </div>
+
+  <div class="triage" id="tri">
+    <div class="tri-lbl">What do you need right now?</div>
+    <button class="tri-btn tri-cr" onclick="enterCrisis()">
+      <div class="tri-ic">😤</div>
+      <div><div class="tri-ttl">Crisis / Tantrum Now</div><div class="tri-sub">I need help immediately</div></div>
+      <div class="tri-arr">›</div>
+    </button>
+    <button class="tri-btn tri-lg" onclick="enterLog()">
+      <div class="tri-ic">📋</div>
+      <div><div class="tri-ttl">Log a Moment</div><div class="tri-sub">Something just happened</div></div>
+      <div class="tri-arr">›</div>
     </button>
   </div>
 
-  <div class="disclaimer">AutiMa.Life is an AI assistant. It does not replace professional medical advice. Always consult your child's therapist or doctor for clinical decisions.</div>
+  <!-- LOG FORM -->
+  <div class="log-form" id="lf">
+    <div class="lf-fields">
+      <div class="lf-field">
+        <div class="lf-lbl">What happened?</div>
+        <div class="chips" id="cw">
+          <div class="chip" onclick="sc(this,'what')">😤 Meltdown</div>
+          <div class="chip" onclick="sc(this,'what')">😢 Crying</div>
+          <div class="chip" onclick="sc(this,'what')">😠 Aggression</div>
+          <div class="chip" onclick="sc(this,'what')">😶 Withdrawal</div>
+          <div class="chip" onclick="sc(this,'what')">🔄 Repetitive behavior</div>
+          <div class="chip" onclick="sc(this,'what')">❓ Other</div>
+        </div>
+      </div>
+      <div class="lf-field">
+        <div class="lf-lbl">Time of day</div>
+        <div class="chips" id="ct">
+          <div class="chip" onclick="sc(this,'time')">🌅 Morning</div>
+          <div class="chip" onclick="sc(this,'time')">☀️ Afternoon</div>
+          <div class="chip" onclick="sc(this,'time')">🌆 Evening</div>
+          <div class="chip" onclick="sc(this,'time')">🌙 Night</div>
+        </div>
+      </div>
+      <div class="lf-field">
+        <div class="lf-lbl">Last meal was</div>
+        <div class="chips" id="cf">
+          <div class="chip" onclick="sc(this,'food')">✅ Under 1 hour ago</div>
+          <div class="chip" onclick="sc(this,'food')">⏱️ 1–2 hours ago</div>
+          <div class="chip" onclick="sc(this,'food')">⚠️ 3+ hours ago</div>
+          <div class="chip" onclick="sc(this,'food')">❌ Skipped meal</div>
+        </div>
+      </div>
+      <div class="lf-field">
+        <div class="lf-lbl">Sleep last night</div>
+        <div class="chips" id="cs">
+          <div class="chip" onclick="sc(this,'sleep')">😴 Good — 8hrs+</div>
+          <div class="chip" onclick="sc(this,'sleep')">😐 Okay — 6–7hrs</div>
+          <div class="chip" onclick="sc(this,'sleep')">😩 Poor — under 6hrs</div>
+          <div class="chip" onclick="sc(this,'sleep')">😰 Broken sleep</div>
+        </div>
+      </div>
+      <div class="lf-field" style="padding-bottom:4px;">
+        <div class="lf-lbl">Likely trigger</div>
+        <div class="chips" id="ctr">
+          <div class="chip" onclick="sc(this,'trigger')">🍽️ Hunger</div>
+          <div class="chip" onclick="sc(this,'trigger')">😴 Tiredness</div>
+          <div class="chip" onclick="sc(this,'trigger')">🔊 Overstimulation</div>
+          <div class="chip" onclick="sc(this,'trigger')">🏥 Therapy day</div>
+          <div class="chip" onclick="sc(this,'trigger')">📱 Screen time</div>
+          <div class="chip" onclick="sc(this,'trigger')">🔄 Routine change</div>
+          <div class="chip" onclick="sc(this,'trigger')">❓ Unknown</div>
+        </div>
+      </div>
+    </div>
+    <!-- SUBMIT PINNED AT BOTTOM — always visible -->
+    <div class="lf-footer">
+      <button class="lf-submit" onclick="submitLog()">Analyse This Moment →</button>
+    </div>
+  </div>
+
+  <!-- SUMMARY CARD (shown after log submitted) -->
+  <div class="sum-card" id="sc-card"></div>
+
+  <div class="bot-bar" id="bb">
+    <div class="inp-row" id="ir">
+      <textarea id="user-input" rows="1"
+        placeholder="Or just type what's on your mind…"
+        oninput="ar(this)" onkeydown="hk(event)"></textarea>
+      <button class="send" id="sb" onclick="sendMsg()">
+        <svg width="14" height="14" viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <button class="calm-btn" id="cb" onclick="exitCrisis()">😌 He's calming down — exit crisis</button>
+    <div class="disc" id="disc">AI assistant · Not medical advice · ⓘ</div>
+  </div>
 </div>
 
 <script>
-let apiKey = '';
-let messages = [];
-let childName = 'your child';
-let eventLog = [];
+let msgs=[], mode='home', sel={what:null,time:null,food:null,sleep:null,trigger:null};
 
-const SYSTEM_PROMPT = `You are AutiMa — a warm, non-judgmental AI companion built specifically for parents of autistic children.
+const SP=`You are AutiMa — a warm, non-judgmental AI companion for parents of autistic children.
 
-WHO YOU ARE:
-You are not a doctor, therapist, or counsellor.
-You are the calm, understanding friend who has been through it too — someone who listens first, never judges, and only offers guidance when the parent is ready.
+WHO YOU ARE: Not a doctor, therapist, or counsellor. The calm understanding friend who listens first, never judges.
+You are a fully functional assistant — emotional support is one part of what you do, not all of it.
 
-You are a fully functional assistant. Emotional support is one part of what you do, not all of it. You help parents:
-- Log behavior episodes and identify triggers
-- Track what happened, when, and possible causes
-- Remind parents about routines that prevent meltdowns
-- Point parents toward specialists when needed
+CRISIS MODE: Skip pleasantries. Open with brief reassurance then ask what is happening RIGHT NOW. Max 2-3 sentences. Focus only on immediate safety and de-escalation. No history or patterns.
 
-WHAT YOU DO IN THIS CONVERSATION:
+LOG MODE: Receive structured log summary. Name the most likely trigger specifically and directly. Give 2-3 prevention steps. Ask if they want to discuss further.
 
-1. LISTEN AND LOG
-When a parent describes an episode, collect:
-- What happened (behavior, intensity)
-- Time of day
-- Last meal time
-- Hours of sleep the night before
-- Sleep quality and pattern — not just hours. Was it broken sleep? Early waking? Difficulty falling asleep?
-- If child woke unusually early or had broken sleep, gently explore why — is he on any medications? Any changes in routine the night before? Any sensory discomfort (hunger, temperature, noise)? Any anxiety or a big event coming up?
-- Any therapy or appointments that day
-- Environment (new place, loud, crowded?)
-- Screen time before the episode
-- Parent's own stress level
+GENERAL: Collect meal time, sleep, therapy day, environment, screen time, parent stress — ONE question at a time. If parent mentions losing patience ask if they are exhausted or sleep deprived. Normalize without excusing. For unusual sleep explore medications, routine changes, sensory issues.
 
-Do this through natural conversation — not like a form.
-Never ask all questions at once.
+NEVER: Diagnose, make parent feel guilty, lecture, cite studies unprompted, act like a therapist, pretend to save data or set reminders.
 
-2. IDENTIFY TRIGGERS
-Once you have enough context, clearly but gently name the likely trigger:
-"Based on what you've shared, it sounds like the combination of skipping lunch and therapy earlier may have contributed to this."
+FORMATTING: No long paragraphs. Max 2 sentences per paragraph with blank line between. Questions on own line at end. Short responses.`;
 
-3. GIVE NEXT STEPS
-Always end with 1-3 clear, practical actions the parent can take right now or today.
+function $(id){return document.getElementById(id);}
 
-4. REMIND ABOUT ROUTINES
-If a parent mentions recurring triggers (always hungry, always after therapy, always screens), remind them of the pattern and suggest a simple prevention routine.
-
-5. SUGGEST SPECIALISTS WHEN NEEDED
-If the situation is beyond daily management, gently suggest:
-"It might be worth discussing this pattern with his therapist or an occupational therapist."
-Do not recommend specific clinics or doctors by name unless the parent specifically asks for local options.
-
-HOW YOU RESPOND:
-- Always acknowledge feelings first
-- Never open with a question, statistic, or advice
-- Ask only ONE question at a time
-- Never say "you should have" or "why didn't you"
-- Never lecture
-- Keep responses short — stressed parents don't read essays
-- Use simple, warm, conversational language
-- If a parent mentions losing patience, snapping, or feeling overwhelmed — gently ask if they have also been exhausted, sleep deprived, or under stress. Help them understand that losing patience under extreme stress happens — even to parents of neurotypical children. Do not justify it as right or wrong. Simply normalize it as human, then move forward with care.
-- When a parent mentions unusual sleep patterns in their child, always explore the cause — not just the duration. For autistic children, sleep disruption often signals something specific: medication effects, sensory discomfort, anxiety, or routine changes. Ask about this gently — "Do you know what might have caused him to wake so early? Is he on any medications, or was there anything different about yesterday?"
-
-WHAT YOU TRACK IN THIS CONVERSATION:
-- Child's name if mentioned
-- Triggers identified (hunger, sleep, overstimulation, schedule changes, therapy days, sensory issues)
-- What helped or didn't help
-- Parent's emotional state
-- Any reminders or follow-ups the parent needs
-
-WHAT YOU NEVER DO:
-- Never diagnose the child
-- Never make the parent feel guilty
-- Never cite scientific studies unprompted
-- Never give references unless specifically asked
-- Never act like a therapist or counsellor — you are a functional assistant that also listens. Acknowledge and normalize, then move to action. Do not dwell in emotional support longer than needed.
-- Never pretend to save data, set actual reminders, or access a dashboard — these features are coming. If a parent asks about them, say warmly: "That's coming soon — for now, let's make note of this together in our conversation."
-- If sharing any reference always add: "This is based on available data — always consult your child's doctor or therapist for clinical decisions."
-
-RESPONSE STRUCTURE (follow this every time):
-1. Acknowledge — validate what the parent is feeling
-2. Normalize — if they express guilt or frustration, gently normalize it as human without excusing it
-3. Understand — ask one gentle question to learn more
-4. Guide — once you have context, offer clear next steps
-
-FORMATTING RULES (critical — always follow these):
-- Never write in one long paragraph
-- Each distinct thought gets its own line with a blank line between them
-- Maximum 2 sentences per paragraph
-- If giving next steps, use a numbered list — one step per line
-- If identifying a trigger, put it on its own line so it stands out
-- Questions always go on their own line at the end
-- Think of each response as having breathing room — 
-  white space makes stressed parents actually read it
-
-Example of correct formatting:
-"That sounds like such a hard morning. Running on no sleep with a little one is genuinely exhausting.
-
-It makes complete sense that you reached your limit — most parents would.
-
-Can I ask — was last night the first time he woke that early, or has this been happening for a few days?"
-
-Example of wrong formatting:
-"That sounds like such a hard morning and running on no sleep with a little one is genuinely exhausting and it makes complete sense that you reached your limit because most parents would so can I ask was last night the first time he woke that early or has this been happening for a few days?"`;
-
-
-function startApp() {
-  document.getElementById('setup-screen').style.display = 'none';
-  document.getElementById('app-screen').style.display = 'flex';
-  document.getElementById('app-screen').style.flexDirection = 'column';
-
-  const now = new Date();
-  document.getElementById('session-meta').textContent = `Session started ${now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}`;
-
-  addMessage('ai', "Hi, I'm AutiMa 🌿 I'm here to help you navigate your child's day.\n\nYou can tell me what's happening right now, log something that just happened, or just talk through a difficult moment. What's on your mind?");
+function startApp(){
+  $('ws').style.display='none';
+  const a=$('as'); a.style.display='flex'; a.style.flexDirection='column';
+  setMode('home');
+  addMsg('ai',"Hi, I'm AutiMa 🌿 I'm here whenever you need me.\n\nHow can I help right now?");
 }
 
-function showSetup() {
-  document.getElementById('setup-screen').style.display = 'flex';
-  document.getElementById('app-screen').style.display = 'none';
-}
+function setMode(m){
+  mode=m;
+  const hdr=$('hdr'),ca=$('ca'),lb=$('lb'),ic=$('ic'),tri=$('tri'),lf=$('lf'),
+        chat=$('chat'),ir=$('ir'),cb=$('cb'),disc=$('disc'),sb=$('sb'),
+        sdot=$('sdot'),inp=$('user-input'),bb=$('bb'),sc=$('sc-card');
 
-function addMessage(role, text) {
-  const window = document.getElementById('chat-window');
-  const div = document.createElement('div');
-  div.className = `msg ${role}`;
+  hdr.className='app-hdr';
+  ca.style.display='none'; lb.style.display='none'; ic.style.display='none';
+  tri.style.display='none'; lf.style.display='none'; sc.style.display='none';
+  chat.style.display='flex'; ir.classList.remove('cr-inp'); sb.classList.remove('cr-send');
+  cb.style.display='none'; bb.classList.remove('cr-bar'); disc.classList.remove('cr-disc');
+  sdot.classList.remove('amb'); inp.placeholder='Or just type what\'s on your mind…';
 
-  const now = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-  const avatar = role === 'ai' ? '🌿' : '👤';
-
-  // Check for trigger detection to add alert
-  let alertHTML = '';
-  if (role === 'ai' && (text.toLowerCase().includes('trigger') || text.toLowerCase().includes('likely') || text.toLowerCase().includes('probably hungry') || text.toLowerCase().includes('overtired'))) {
-    // subtle — handled inline
-  }
-
-  div.innerHTML = `
-    <div class="msg-avatar">${avatar}</div>
-    <div>
-      <div class="msg-bubble">${text
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\n\n/g, '<br><br>')
-        .replace(/\n/g, '<br>')
-      }</div>
-      <div class="msg-time">${now}</div>
-    </div>
-  `;
-  window.appendChild(div);
-  window.scrollTop = window.scrollHeight;
-
-  // Log event
-  eventLog.push({ role, text, time: now });
-
-  // Extract child name if mentioned
-  const nameMatch = text.match(/(?:his name is|she's called|he's called|my (?:son|daughter|child) (?:is )?(?:named )?)([A-Z][a-z]+)/i);
-  if (nameMatch && role === 'user') {
-    childName = nameMatch[1];
-    document.getElementById('child-display-name').textContent = childName;
+  if(m==='home'){
+    ic.style.display='block'; tri.style.display='flex';
+    disc.textContent='AI assistant · Not medical advice · ⓘ';
+  } else if(m==='crisis'){
+    hdr.classList.add('crisis'); ca.style.display='block'; sdot.classList.add('amb');
+    ir.classList.add('cr-inp'); sb.classList.add('cr-send'); cb.style.display='block';
+    bb.classList.add('cr-bar'); disc.classList.add('cr-disc');
+    disc.textContent='Crisis mode active · ⓘ'; inp.placeholder='Tell me what\'s happening…';
+  } else if(m==='log'){
+    hdr.classList.add('log'); lb.style.display='flex'; lf.style.display='flex';
+    chat.style.display='none'; disc.textContent='AI assistant · Not medical advice · ⓘ';
   }
 }
 
-function showTyping() {
-  const window = document.getElementById('chat-window');
-  const div = document.createElement('div');
-  div.className = 'msg ai';
-  div.id = 'typing-indicator';
-  div.innerHTML = `
-    <div class="msg-avatar">🌿</div>
-    <div class="msg-bubble" style="padding:10px 14px">
-      <div class="typing-dots"><span></span><span></span><span></span></div>
-    </div>
+function enterCrisis(){
+  msgs=[]; $('chat').innerHTML=''; setMode('crisis');
+  msgs.push({role:'user',content:'CRISIS MODE ACTIVATED. Parent needs immediate help right now.'});
+  callAI();
+}
+
+function exitCrisis(){
+  msgs=[]; $('chat').innerHTML=''; setMode('home');
+  addMsg('ai',"I'm glad things are calming down 🌿\n\nWhenever you're ready, we can log what happened to understand the trigger better.");
+}
+
+function enterLog(){
+  msgs=[]; sel={what:null,time:null,food:null,sleep:null,trigger:null};
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));
+  setMode('log');
+}
+
+function exitLog(){
+  msgs=[]; $('chat').innerHTML=''; setMode('home');
+  addMsg('ai',"Okay, we can come back to that whenever you're ready 🌿\n\nIs there anything else on your mind?");
+}
+
+function sc(el,field){
+  const map={what:'cw',time:'ct',food:'cf',sleep:'cs',trigger:'ctr'};
+  document.querySelectorAll(`#${map[field]} .chip`).forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel'); sel[field]=el.textContent.trim();
+}
+
+function submitLog(){
+  const {what,time,food,sleep,trigger}=sel;
+  const filled=[what,time,food,sleep,trigger].filter(v=>v);
+  if(filled.length<3){alert('Please select at least 3 fields to help AutiMa understand what happened.');return;}
+
+  $('lf').style.display='none';
+  $('chat').style.display='flex';
+
+  const sc=$('sc-card');
+  sc.style.display='block';
+  sc.innerHTML=`
+    <div class="sum-title">📋 Moment Logged</div>
+    ${what?`<div class="sum-row"><span class="sum-lbl">What happened</span><span class="sum-val">${what}</span></div>`:''}
+    ${time?`<div class="sum-row"><span class="sum-lbl">Time of day</span><span class="sum-val">${time}</span></div>`:''}
+    ${food?`<div class="sum-row"><span class="sum-lbl">Last meal</span><span class="sum-val">${food}</span></div>`:''}
+    ${sleep?`<div class="sum-row"><span class="sum-lbl">Sleep</span><span class="sum-val">${sleep}</span></div>`:''}
+    ${trigger?`<div class="sum-row"><span class="sum-lbl">Likely trigger</span><span class="sum-val">${trigger}</span></div>`:''}
   `;
-  window.appendChild(div);
-  window.scrollTop = window.scrollHeight;
+
+  const prompt=`LOG MODE — Parent submitted this structured log:
+- What happened: ${what||'Not specified'}
+- Time of day: ${time||'Not specified'}
+- Last meal: ${food||'Not specified'}
+- Sleep last night: ${sleep||'Not specified'}
+- Likely trigger: ${trigger||'Not specified'}
+
+Analyse this, name the most likely trigger specifically, give 2-3 prevention steps, then ask if they want to discuss further.`;
+
+  msgs.push({role:'user',content:prompt});
+  callAI();
 }
 
-function removeTyping() {
-  const t = document.getElementById('typing-indicator');
-  if (t) t.remove();
+function addMsg(role,text){
+  const chat=$('chat');
+  const d=document.createElement('div');
+  const isCr=mode==='crisis'&&role==='ai';
+  d.className=`msg ${role==='user'?'user':isCr?'crai':'ai'}`;
+  const t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  if(role==='user'){
+    d.innerHTML=`<div><div class="mbub">${fmt(text)}</div><div class="mtime">${t}</div></div>`;
+  } else {
+    d.innerHTML=`<div class="mav">🌿</div><div><div class="mbub">${fmt(text)}</div><div class="mtime">${t}</div></div>`;
+  }
+  chat.appendChild(d); chat.scrollTop=chat.scrollHeight;
+
+  const nm=text.match(/(?:his name is|her name is|my (?:son|daughter|child) (?:is )?(?:named )?)([A-Z][a-z]+)/i);
+  if(nm&&role==='user'){
+    $('cname').textContent=nm[1]; $('cinit').textContent=nm[1][0].toUpperCase();
+  }
 }
 
-async function sendMessage(text) {
-  const input = document.getElementById('user-input');
-  const userText = text || input.value.trim();
-  if (!userText) return;
+function fmt(t){
+  return t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');
+}
 
-  if (!text) input.value = '';
-  input.style.height = 'auto';
+function showTyping(){
+  const chat=$('chat');
+  const d=document.createElement('div');
+  d.className=`msg ${mode==='crisis'?'crai':'ai'}`; d.id='ti';
+  d.innerHTML=`<div class="mav">🌿</div><div class="mbub" style="padding:10px 14px"><div class="tdots"><span></span><span></span><span></span></div></div>`;
+  chat.appendChild(d); chat.scrollTop=chat.scrollHeight;
+}
+function removeTyping(){const t=$('ti');if(t)t.remove();}
 
-  addMessage('user', userText);
-  messages.push({ role: 'user', content: userText });
-
+async function callAI(){
   showTyping();
-
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          ...messages
-        ]
-      })
-    });
-
-    const data = await res.json();
-    removeTyping();
-
-    if (data.error) {
-      addMessage('ai', `⚠️ Something went wrong. Please try again in a moment.`);
-      return;
-    }
-
-    const reply = data.choices[0].message.content;
-    messages.push({ role: 'assistant', content: reply });
-    addMessage('ai', reply);
-
-  } catch (err) {
-    removeTyping();
-    addMessage('ai', '⚠️ Could not connect. Please check your internet connection and try again.');
-  }
+  try{
+    const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({messages:[{role:'system',content:SP},...msgs]})});
+    const d=await r.json(); removeTyping();
+    if(d.error){addMsg('ai','⚠️ Something went wrong. Please try again.');return;}
+    const rep=d.choices[0].message.content;
+    msgs.push({role:'assistant',content:rep}); addMsg('ai',rep);
+  }catch(e){removeTyping();addMsg('ai','⚠️ Could not connect. Please check your internet connection.');}
 }
 
-function quickLog(text) {
-  document.getElementById('user-input').value = text;
-  sendMessage(text);
+async function sendMsg(){
+  const inp=$('user-input'),txt=inp.value.trim();
+  if(!txt)return; inp.value=''; inp.style.height='auto';
+  addMsg('user',txt); msgs.push({role:'user',content:txt}); callAI();
 }
 
-function handleKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
-}
-
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-}
+function hk(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
+function ar(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
 </script>
 </body>
 </html>
