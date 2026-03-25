@@ -70,7 +70,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
 .lb-done{margin-left:auto;font-size:11px;color:rgba(255,255,255,0.7);background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;}
 
 /* CHAT */
-.chat-area{flex:1;overflow-y:auto;padding:16px 16px 0;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth;}
+.chat-area{flex:1;overflow-y:auto;padding:16px 16px 8px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth;background:#F0EDE6;}
 @media(min-width:640px){.chat-area{max-width:720px;width:100%;margin:0 auto;padding:20px 24px 0;}}
 .msg{display:flex;gap:10px;animation:fadeUp 0.25s ease;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -114,9 +114,9 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
 /* STICKY TRIAGE PILL — shown after user starts chatting */
 .triage-pill{
   position:fixed;
-  bottom:80px;
+  bottom:120px;
   right:16px;
-  background:var(--deep);
+  background:var(--amber);
   color:var(--white);
   border:none;
   border-radius:24px;
@@ -128,12 +128,12 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
   display:none;
   align-items:center;
   gap:7px;
-  box-shadow:0 4px 20px rgba(44,62,53,0.25);
+  box-shadow:0 4px 20px rgba(212,149,106,0.4);
   z-index:50;
   transition:transform 0.2s,box-shadow 0.2s;
   animation:fadeUp 0.3s ease;
 }
-.triage-pill:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(44,62,53,0.3);}
+.triage-pill:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(212,149,106,0.5);}
 .triage-pill:active{transform:scale(0.97);}
 .triage-pill-icon{font-size:16px;}
 
@@ -524,6 +524,7 @@ function setMode(m){
 function enterCrisis(){
   msgs=[]; $('chat').innerHTML='';
   const pill=$('triage-pill'); if(pill) pill.style.display='none';
+  const ic=$('ic'); if(ic) ic.style.display='none';
   closeTriageOverlay();
   setMode('crisis');
   msgs.push({role:'user',content:'CRISIS MODE ACTIVATED. Parent needs immediate help right now.'});
@@ -541,6 +542,7 @@ function enterLog(){
   msgs=[]; sel={what:null,time:null,food:null,sleep:null,trigger:null};
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));
   const pill=$('triage-pill'); if(pill) pill.style.display='none';
+  const ic=$('ic'); if(ic) ic.style.display='none';
   closeTriageOverlay();
   setMode('log');
 }
@@ -641,11 +643,16 @@ async function callAI(){
 
 function hideTriage(){
   const tri=$('tri');
-  if(!tri||tri.style.display==='none')return;
+  const ic=$('ic');
+  const alreadyHidden = !tri || tri.style.display==='none';
+  if(alreadyHidden) return;
   tri.classList.add('hiding');
+  // Also hide insight card smoothly
+  if(ic) { ic.style.transition='opacity 0.3s'; ic.style.opacity='0'; }
   setTimeout(()=>{
     tri.style.display='none';
     tri.classList.remove('hiding');
+    if(ic) ic.style.display='none';
     // Show sticky pill only in home mode
     if(mode==='home'){
       const pill=$('triage-pill');
