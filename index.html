@@ -81,7 +81,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
 @media(max-width:640px){.mbub{max-width:88%;}}
 .msg.ai .mbub{background:var(--white);border:1px solid var(--border);border-top-left-radius:4px;color:var(--text);box-shadow:0 2px 8px rgba(44,62,53,0.05);}
 .msg.crai .mbub{background:var(--amber-pale);border:1.5px solid var(--amber-light);border-top-left-radius:4px;color:#7B4B2A;}
-.msg.user .mbub{background:var(--deep);color:var(--white);border-top-right-radius:4px;}
+.msg.user .mbub{background:var(--deep);color:var(--white);border-top-right-radius:4px;width:fit-content;min-width:0;}
 .mtime{font-size:10px;color:var(--text-light);margin-top:4px;opacity:0.7;}
 .msg.ai .mtime,.msg.crai .mtime{text-align:left;}
 .msg.user .mtime{text-align:right;}
@@ -479,11 +479,15 @@ WHAT YOU NEVER DO:
 - Never give advice before the parent feels heard
 
 FORMATTING:
-- Short paragraphs — max 2 sentences each
+- Short paragraphs — max 2 sentences each, ideally 1
 - Blank line between paragraphs
 - Questions always on their own line at the end
 - Never use numbered lists in general chat — save those for log mode prevention steps only
-- Responses should feel like a text from a friend, not a report`;
+- Responses should feel like a text from a friend, not a report
+- KEEP IT BRIEF — most responses should be 2-3 short paragraphs maximum
+- Do not over-explain or over-empathise. One genuine acknowledgement is enough. Then move forward.
+- If you find yourself writing more than 4 lines before asking a question, you are writing too much. Cut it.
+- No flowing prose. No building up to a point. Say the thing directly.`;
 
 function $(id){return document.getElementById(id);}
 
