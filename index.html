@@ -77,8 +77,8 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
 .msg.user{flex-direction:row-reverse;}
 .mav{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:2px;background:var(--sage-pale);}
 .msg.crai .mav{background:var(--amber-pale);}
-.mbub{max-width:75%;padding:12px 16px;border-radius:18px;font-size:14px;line-height:1.65;}
-@media(max-width:640px){.mbub{max-width:88%;}}
+.mbub{max-width:85%;padding:12px 16px;border-radius:18px;font-size:14px;line-height:1.65;}
+@media(max-width:640px){.mbub{max-width:92%;}}
 .msg.ai .mbub{background:var(--white);border:1px solid var(--border);border-top-left-radius:4px;color:var(--text);box-shadow:0 2px 8px rgba(44,62,53,0.05);}
 .msg.crai .mbub{background:var(--amber-pale);border:1.5px solid var(--amber-light);border-top-left-radius:4px;color:#7B4B2A;}
 .msg.user .mbub{background:var(--deep);color:var(--white);border-top-right-radius:4px;width:fit-content;min-width:0;}
@@ -277,8 +277,9 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
   </div>
   <div class="auth-bot">
     <div id="auth-error" class="auth-error"></div>
+    <input class="auth-input" id="auth-name" type="text" placeholder="Your name (e.g. Sarah)" />
     <input class="auth-input" id="auth-email" type="email" placeholder="Your email address" />
-    <input class="auth-input" id="auth-password" type="password" placeholder="Password" />
+    <input class="auth-input" id="auth-password" type="password" placeholder="Password (min 6 characters)" />
     <button class="auth-btn" id="auth-submit-btn" onclick="handleEmailAuth()">Create Account</button>
     <div class="auth-divider">or</div>
     <button class="auth-google-btn" onclick="handleGoogleAuth()">
@@ -533,13 +534,23 @@ Of course you reached your limit. That doesn't make you a bad parent. It makes y
 
 How are you feeling right now — are you okay?"
 
-WHAT YOU NEVER DO:
+WHAT YOU NEVER DO — THESE APPLY IN ALL MODES WITHOUT EXCEPTION:
 - Never diagnose the child
 - Never make the parent feel guilty
 - Never lecture or cite studies unprompted
 - Never act like a therapist — acknowledge and normalize, then move to action
 - Never pretend to save data or set reminders — say warmly "that feature is coming soon"
 - Never give advice before the parent feels heard
+
+CHILD SAFETY — ABSOLUTE RULES ACROSS ALL MODES:
+- NEVER tell a parent to leave their autistic child alone, walk away, or go to another room. Autistic children must not be left unsupervised during a meltdown or distress — this can cause serious harm.
+- NEVER suggest any physical intervention — no holding down, restraining, spanking, hitting, or any physical punishment whatsoever.
+- NEVER suggest the parent shout, yell, raise their voice, or use anger as a tool.
+- NEVER suggest isolating the child as a consequence or management strategy.
+- NEVER frame "taking a break from the child" as a de-escalation strategy for the child's behavior.
+- ALWAYS guide the parent to stay present and calm in the same space as the child.
+- ALWAYS focus on reducing sensory input, speaking softly, offering comfort items, and waiting out the episode safely together.
+- These rules apply in general chat, log mode, and crisis mode equally. There are no exceptions.
 
 FORMATTING:
 - Short paragraphs — max 2 sentences each, ideally 1
@@ -599,6 +610,17 @@ function enterCrisis(){
 }
 
 function exitCrisis(){
+  // Save crisis conversation to logs if user is logged in
+  if(window.currentUserId && msgs.length > 1){
+    const conversation = msgs
+      .filter(m=>m.role!=='user'||!m.content.includes('CRISIS MODE ACTIVATED'))
+      .map(m=>({ role:m.role, content:m.content }));
+    window.saveLog('crisis', {
+      conversation,
+      summary: 'Crisis mode session — meltdown episode',
+      timestamp: new Date().toISOString()
+    });
+  }
   msgs=[]; $('chat').innerHTML='';
   const pill=$('triage-pill'); if(pill) pill.style.display='none';
   setMode('home');
@@ -623,8 +645,15 @@ function exitLog(){
 
 function sc(el,field){
   const map={what:'cw',time:'ct',food:'cf',sleep:'cs',trigger:'ctr'};
-  document.querySelectorAll(`#${map[field]} .chip`).forEach(c=>c.classList.remove('sel'));
-  el.classList.add('sel'); sel[field]=el.textContent.trim();
+  // Trigger field allows multiple selections, others single
+  if(field==='trigger'){
+    el.classList.toggle('sel');
+    const selected=[...document.querySelectorAll(`#${map[field]} .chip.sel`)].map(c=>c.textContent.trim());
+    sel[field]=selected.length>0?selected.join(', '):null;
+  } else {
+    document.querySelectorAll(`#${map[field]} .chip`).forEach(c=>c.classList.remove('sel'));
+    el.classList.add('sel'); sel[field]=el.textContent.trim();
+  }
 }
 
 function submitLog(){
@@ -813,7 +842,8 @@ function onUserLoggedIn(user) {
 
   // Start app
   window.setMode('home');
-  window.addMsg('ai', `Welcome back 🌿\n\nI'm here whenever you need me. How can I help today?`);
+  const firstName = (user.displayName || 'there').split(' ')[0];
+  window.addMsg('ai', `Welcome back, ${firstName} 🌿\n\nI'm here whenever you need me. How can I help today?`);
 
   // Expose user id globally for log saving
   window.currentUserId = user.uid;
@@ -832,12 +862,16 @@ window.showAuth = function(mode) {
 function updateAuthUI() {
   const btn = document.getElementById('auth-submit-btn');
   const switchText = document.getElementById('auth-switch-text');
+  const nameField = document.getElementById('auth-name');
   if (authMode === 'signup') {
     btn.textContent = 'Create Account';
     switchText.innerHTML = 'Already have an account? <span onclick="window.toggleAuthMode()">Sign in</span>';
+    nameField.style.display = 'block';
+    nameField.placeholder = 'Your name (e.g. Sarah)';
   } else {
     btn.textContent = 'Sign In';
     switchText.innerHTML = "Don't have an account? <span onclick=\"window.toggleAuthMode()\">Sign up</span>";
+    nameField.style.display = 'none';
   }
 }
 
@@ -848,11 +882,17 @@ window.toggleAuthMode = function() {
 }
 
 window.handleEmailAuth = async function() {
+  const name = document.getElementById('auth-name').value.trim();
   const email = document.getElementById('auth-email').value.trim();
   const password = document.getElementById('auth-password').value;
   const errorEl = document.getElementById('auth-error');
   const btn = document.getElementById('auth-submit-btn');
 
+  if (authMode === 'signup' && !name) {
+    errorEl.textContent = 'Please enter your name.';
+    errorEl.style.display = 'block';
+    return;
+  }
   if (!email || !password) {
     errorEl.textContent = 'Please enter your email and password.';
     errorEl.style.display = 'block';
@@ -865,7 +905,9 @@ window.handleEmailAuth = async function() {
 
   try {
     if (authMode === 'signup') {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      // Save display name
+      await updateProfile(cred.user, { displayName: name });
     } else {
       await signInWithEmailAndPassword(auth, email, password);
     }
