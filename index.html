@@ -915,7 +915,7 @@ window.handleEmailAuth = async function() {
   } catch (err) {
     btn.textContent = authMode === 'signup' ? 'Create Account' : 'Sign In';
     btn.disabled = false;
-    errorEl.textContent = getFriendlyError(err.code);
+    errorEl.innerHTML = getFriendlyError(err.code);
     errorEl.style.display = 'block';
   }
 }
@@ -926,7 +926,7 @@ window.handleGoogleAuth = async function() {
     await signInWithPopup(auth, googleProvider);
     // onAuthStateChanged handles the rest
   } catch (err) {
-    errorEl.textContent = getFriendlyError(err.code);
+    errorEl.innerHTML = getFriendlyError(err.code);
     errorEl.style.display = 'block';
   }
 }
@@ -978,7 +978,7 @@ window.saveLog = async function(type, data) {
 
 function getFriendlyError(code) {
   const errors = {
-    'auth/email-already-in-use': 'An account with this email already exists. Try signing in.',
+    'auth/email-already-in-use': 'An account with this email already exists. <span style="color:var(--sage);cursor:pointer;font-weight:600;text-decoration:underline;" onclick="window.toggleAuthMode()">Sign in instead →</span>',
     'auth/weak-password': 'Password must be at least 6 characters.',
     'auth/user-not-found': 'No account found with this email.',
     'auth/wrong-password': 'Incorrect password. Please try again.',
