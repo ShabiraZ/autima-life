@@ -105,6 +105,23 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
 .tri-btn{display:flex;align-items:center;gap:12px;border-radius:16px;padding:14px 16px;cursor:pointer;border:none;width:100%;font-family:'DM Sans',sans-serif;text-align:left;transition:transform 0.1s;}
 .tri-btn:active{transform:scale(0.98);}
 .tri-cr{background:linear-gradient(135deg,#FFF3E0,#FDEBD0);border:1.5px solid var(--amber);}
+.tri-ms{background:linear-gradient(135deg,#FFF9E6,#FFF3CC);border:1.5px solid #D4B94A;}
+
+/* MILESTONE MODAL */
+#milestone-modal{position:fixed;inset:0;z-index:200;display:none;align-items:flex-end;justify-content:center;}
+#milestone-modal.open{display:flex;}
+.ms-backdrop{position:absolute;inset:0;background:rgba(44,62,53,0.5);backdrop-filter:blur(2px);}
+.ms-sheet{position:relative;z-index:1;background:var(--white);border-radius:24px 24px 0 0;width:100%;max-width:680px;padding:20px 20px 36px;display:flex;flex-direction:column;gap:14px;animation:slideUp 0.3s ease;}
+.ms-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 6px;}
+.ms-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--deep);text-align:center;}
+.ms-subtitle{font-size:13px;color:var(--text-light);text-align:center;margin-top:-6px;}
+.ms-cats{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+.ms-cat{padding:8px 14px;background:var(--warm);border:1.5px solid var(--border);border-radius:20px;font-size:13px;color:var(--mid);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.15s;}
+.ms-cat.sel{background:#FFF9E6;border-color:#D4B94A;color:#7A6010;}
+.ms-textarea{width:100%;padding:14px;border:1.5px solid var(--border);border-radius:14px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--warm);outline:none;resize:none;min-height:90px;line-height:1.5;transition:border-color 0.2s;}
+.ms-textarea:focus{border-color:var(--sage);}
+.ms-save-btn{width:100%;padding:15px;background:#7A6010;color:white;border:none;border-radius:14px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background 0.2s;}
+.ms-save-btn:hover{background:#5a4a0c;}
 .tri-lg{background:linear-gradient(135deg,var(--sage-pale),#d8ecdf);border:1.5px solid var(--sage-light);}
 .tri-ic{font-size:22px;flex-shrink:0;}
 .tri-ttl{font-size:14px;font-weight:600;color:var(--deep);margin-bottom:2px;}
@@ -397,6 +414,11 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
       <div><div class="tri-ttl">Log a Moment</div><div class="tri-sub">Something just happened</div></div>
       <div class="tri-arr">›</div>
     </button>
+    <button class="tri-btn tri-ms" onclick="openMilestone()">
+      <div class="tri-ic">⭐</div>
+      <div><div class="tri-ttl">Add a Milestone</div><div class="tri-sub">Record a win or progress</div></div>
+      <div class="tri-arr">›</div>
+    </button>
   </div>
 
   <!-- LOG FORM -->
@@ -496,6 +518,11 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
       <div><div class="tri-ttl">Log a Moment</div><div class="tri-sub">Something just happened</div></div>
       <div class="tri-arr">›</div>
     </button>
+    <button class="tri-btn tri-ms" onclick="closeTriageOverlay(); openMilestone()">
+      <div class="tri-ic">⭐</div>
+      <div><div class="tri-ttl">Add a Milestone</div><div class="tri-sub">Record a win or progress</div></div>
+      <div class="tri-arr">›</div>
+    </button>
   </div>
 </div>
 
@@ -540,6 +567,29 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
     <div class="summary-footer">
       <button class="summary-copy-btn" onclick="copySummary()">📋 Copy to Clipboard</button>
     </div>
+  </div>
+</div>
+
+<!-- MILESTONE MODAL -->
+<div id="milestone-modal">
+  <div class="ms-backdrop" onclick="closeMilestone()"></div>
+  <div class="ms-sheet">
+    <div class="ms-handle"></div>
+    <div class="ms-title">⭐ Add a Milestone</div>
+    <div class="ms-subtitle">Celebrate a win or record progress</div>
+    <div class="ms-cats">
+      <div class="ms-cat" onclick="selectMsCat(this)">🗣️ Communication</div>
+      <div class="ms-cat" onclick="selectMsCat(this)">👁️ Eye Contact</div>
+      <div class="ms-cat" onclick="selectMsCat(this)">🤝 Social</div>
+      <div class="ms-cat" onclick="selectMsCat(this)">🧠 Learning</div>
+      <div class="ms-cat" onclick="selectMsCat(this)">😌 Self-regulation</div>
+      <div class="ms-cat" onclick="selectMsCat(this)">🍽️ Eating</div>
+      <div class="ms-cat" onclick="selectMsCat(this)">😴 Sleep</div>
+      <div class="ms-cat" onclick="selectMsCat(this)">🎯 Therapy goal</div>
+      <div class="ms-cat" onclick="selectMsCat(this)">✨ Other win</div>
+    </div>
+    <textarea class="ms-textarea" id="ms-note" placeholder="Describe what happened... e.g. Said mama for the first time today 🥹"></textarea>
+    <button class="ms-save-btn" onclick="saveMilestone()">Save Milestone ⭐</button>
   </div>
 </div>
 
@@ -1044,6 +1094,51 @@ function hk(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
 function ar(el){
   hideTriage(); // hide triage as soon as user starts typing
   el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';
+}
+
+// ── Milestone functions ──
+let selectedMsCat = '';
+
+window.openMilestone = function(){
+  document.getElementById('milestone-modal').classList.add('open');
+  document.getElementById('ms-note').value='';
+  selectedMsCat='';
+  document.querySelectorAll('.ms-cat').forEach(c=>c.classList.remove('sel'));
+}
+
+window.closeMilestone = function(){
+  document.getElementById('milestone-modal').classList.remove('open');
+}
+
+window.selectMsCat = function(el){
+  document.querySelectorAll('.ms-cat').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  selectedMsCat = el.textContent.trim();
+}
+
+window.saveMilestone = async function(){
+  const note = document.getElementById('ms-note').value.trim();
+  if(!note && !selectedMsCat){
+    alert('Please add a description or select a category.');
+    return;
+  }
+  const btn = document.querySelector('.ms-save-btn');
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
+
+  if(window.currentUserId){
+    await window.saveLog('milestone',{
+      category: selectedMsCat || 'General',
+      note: note,
+      date: new Date().toLocaleDateString('en-MY',{day:'numeric',month:'long',year:'numeric'})
+    });
+  }
+
+  closeMilestone();
+  btn.textContent = 'Save Milestone ⭐';
+  btn.disabled = false;
+
+  addMsg('ai', `⭐ Milestone saved!\n\n${selectedMsCat?selectedMsCat+' — ':''}${note}\n\nThese moments matter. It'll be in your logs when you need it for a therapist appointment.`);
 }
 </script>
 
