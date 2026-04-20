@@ -909,6 +909,7 @@ function setMode(m){
 
 function enterCrisis(){
   msgs=[]; $('chat').innerHTML='';
+  hideTriage();
   const pill=$('triage-pill'); if(pill) pill.style.display='none';
   const ic=$('ic'); if(ic) ic.style.display='none';
   closeTriageOverlay();
@@ -918,7 +919,6 @@ function enterCrisis(){
 }
 
 function exitCrisis(){
-  // Save crisis conversation to logs if user is logged in
   if(window.currentUserId && msgs.length > 1){
     const conversation = msgs
       .filter(m=>m.role!=='user'||!m.content.includes('CRISIS MODE ACTIVATED'))
@@ -938,6 +938,7 @@ function exitCrisis(){
 function enterLog(){
   msgs=[]; sel={what:null,time:null,food:null,sleep:null,trigger:null};
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));
+  hideTriage();
   const pill=$('triage-pill'); if(pill) pill.style.display='none';
   const ic=$('ic'); if(ic) ic.style.display='none';
   closeTriageOverlay();
@@ -1100,6 +1101,7 @@ function ar(el){
 let selectedMsCat = '';
 
 window.openMilestone = function(){
+  hideTriage();
   document.getElementById('milestone-modal').classList.add('open');
   document.getElementById('ms-note').value='';
   selectedMsCat='';
