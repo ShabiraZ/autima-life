@@ -90,22 +90,22 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
 .tdots span:nth-child(2){animation-delay:0.2s}.tdots span:nth-child(3){animation-delay:0.4s}
 @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
 
-/* INSIGHT CARD */
-.ins-card{margin:12px 16px 0;background:linear-gradient(135deg,var(--deep),#1e2e27);border-radius:16px;padding:14px 16px;flex-shrink:0;display:none;}
-.ins-hdr{display:flex;align-items:center;gap:7px;margin-bottom:7px;}
-.ins-title{font-size:11px;font-weight:600;color:var(--sage-light);letter-spacing:0.3px;text-transform:uppercase;}
-.ins-badge{margin-left:auto;font-size:9px;color:var(--mid);background:rgba(123,158,135,0.15);padding:2px 7px;border-radius:6px;}
-.ins-text{font-size:12px;color:var(--text-light);line-height:1.5;}
-.ins-text strong{color:var(--sage-light);}
+/* INSIGHT CARD — compact subtle strip */
+.ins-card{margin:0 0 2px;background:rgba(44,62,53,0.06);border:1px solid var(--border);border-radius:12px;padding:10px 14px;flex-shrink:0;display:none;}
+.ins-hdr{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+.ins-title{font-size:10px;font-weight:600;color:var(--mid);letter-spacing:0.3px;text-transform:uppercase;}
+.ins-badge{margin-left:auto;font-size:9px;color:#A0B5AA;background:rgba(123,158,135,0.1);padding:2px 6px;border-radius:6px;}
+.ins-text{font-size:11px;color:var(--text-light);line-height:1.4;}
+.ins-text strong{color:var(--mid);}
 
-/* TRIAGE */
-.triage{padding:12px 16px 16px;display:none;flex-direction:column;gap:8px;flex-shrink:0;transition:opacity 0.3s,transform 0.3s;}
+/* TRIAGE — compact, less visual weight */
+.triage{padding:0 0 8px;display:none;flex-direction:column;gap:6px;flex-shrink:0;transition:opacity 0.3s,transform 0.3s;}
 .triage.hiding{opacity:0;transform:translateY(8px);pointer-events:none;}
-.tri-lbl{font-size:10px;color:#A0B5AA;letter-spacing:1px;text-transform:uppercase;text-align:center;margin-bottom:2px;}
-.tri-btn{display:flex;align-items:center;gap:12px;border-radius:16px;padding:14px 16px;cursor:pointer;border:none;width:100%;font-family:'DM Sans',sans-serif;text-align:left;transition:transform 0.1s;}
-.tri-btn:active{transform:scale(0.98);}
-.tri-cr{background:linear-gradient(135deg,#FFF3E0,#FDEBD0);border:1.5px solid var(--amber);}
-.tri-ms{background:linear-gradient(135deg,#FFF9E6,#FFF3CC);border:1.5px solid #D4B94A;}
+.tri-lbl{font-size:10px;color:#B0C4BC;letter-spacing:1px;text-transform:uppercase;text-align:center;margin-bottom:2px;}
+.tri-btn{display:flex;align-items:center;gap:10px;border-radius:12px;padding:12px 14px;cursor:pointer;border:none;width:100%;font-family:'DM Sans',sans-serif;text-align:left;transition:transform 0.1s,opacity 0.1s;}
+.tri-btn:active{transform:scale(0.98);opacity:0.85;}
+.tri-cr{background:#FFF3E0;border:1px solid #F2C9A8;}
+.tri-ms{background:#FFFBEC;border:1px solid #EDE2A0;}
 
 /* MILESTONE MODAL */
 #milestone-modal{position:fixed;inset:0;z-index:200;display:none;align-items:flex-end;justify-content:center;}
@@ -122,11 +122,11 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
 .ms-textarea:focus{border-color:var(--sage);}
 .ms-save-btn{width:100%;padding:15px;background:#7A6010;color:white;border:none;border-radius:14px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background 0.2s;}
 .ms-save-btn:hover{background:#5a4a0c;}
-.tri-lg{background:linear-gradient(135deg,var(--sage-pale),#d8ecdf);border:1.5px solid var(--sage-light);}
-.tri-ic{font-size:22px;flex-shrink:0;}
-.tri-ttl{font-size:14px;font-weight:600;color:var(--deep);margin-bottom:2px;}
-.tri-sub{font-size:12px;color:var(--text-light);}
-.tri-arr{margin-left:auto;font-size:18px;color:#C0CEC8;}
+.tri-lg{background:var(--sage-pale);border:1px solid #C4DBC9;}
+.tri-ic{font-size:16px;flex-shrink:0;}
+.tri-ttl{font-size:13px;font-weight:600;color:var(--deep);margin-bottom:1px;}
+.tri-sub{font-size:11px;color:var(--text-light);}
+.tri-arr{margin-left:auto;font-size:14px;color:#C0CEC8;}
 
 /* STICKY TRIAGE PILL — shown after user starts chatting */
 .triage-pill{
@@ -896,6 +896,8 @@ function setMode(m){
   if(m==='home'){
     ic.style.display='block'; tri.style.display='flex';
     disc.textContent='AI assistant · Not medical advice · ⓘ';
+    // Add padding between chat message and action buttons
+    chat.style.paddingBottom='8px';
   } else if(m==='crisis'){
     hdr.classList.add('crisis'); ca.style.display='block'; sdot.classList.add('amb');
     ir.classList.add('cr-inp'); sb.classList.add('cr-send'); cb.style.display='block';
@@ -1198,7 +1200,17 @@ function onUserLoggedIn(user) {
   // Start app
   window.setMode('home');
   const firstName = (user.displayName || 'there').split(' ')[0];
-  window.addMsg('ai', `Welcome back, ${firstName} 🌿\n\nI'm here whenever you need me. How can I help today?`);
+
+  // Detect new vs returning user based on account creation time
+  const createdAt = new Date(user.metadata.creationTime).getTime();
+  const lastLogin = new Date(user.metadata.lastSignInTime).getTime();
+  const isNewUser = (lastLogin - createdAt) < 10000; // within 10 seconds = new
+
+  if (isNewUser) {
+    window.addMsg('ai', `Hi ${firstName}! Welcome to AutiMa.Life 🌿\n\nI'm here to help you navigate your child's journey — log moments, track triggers, and find calm guidance whenever you need it.\n\nHow can I help you today?`);
+  } else {
+    window.addMsg('ai', `Welcome back, ${firstName} 🌿\n\nI'm here whenever you need me. How can I help today?`);
+  }
 
   // Expose user id globally for log saving
   window.currentUserId = user.uid;
