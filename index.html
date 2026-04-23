@@ -239,18 +239,32 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
 .dash-empty{text-align:center;padding:60px 20px;color:var(--text-light);}
 .dash-empty-icon{font-size:40px;margin-bottom:12px;}
 .dash-empty-text{font-size:14px;line-height:1.6;}
-.log-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:10px;animation:fadeUp 0.2s ease;}
+/* STATS ROW */
+.dash-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:12px;text-align:center;}
+.stat-num{font-family:'DM Serif Display',serif;font-size:24px;color:var(--deep);line-height:1;}
+.stat-lbl{font-size:10px;color:var(--text-light);margin-top:3px;text-transform:uppercase;letter-spacing:0.5px;}
+.stat-card.crisis-stat .stat-num{color:#B8672E;}
+.stat-card.ms-stat .stat-num{color:#2E7D52;}
+
+/* LOG CARDS */
+.log-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:8px;animation:fadeUp 0.2s ease;transition:box-shadow 0.2s;}
+.log-card:hover{box-shadow:0 4px 16px rgba(44,62,53,0.08);}
 .log-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-.log-card-type{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;}
-.log-card-type.crisis{color:#B8672E;}
-.log-card-type.trigger{color:var(--mid);}
-.log-card-type.milestone{color:#2E7D52;}
+.log-card-type{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px;}
+.log-card-type.crisis{color:#B8672E;background:#FFF3E0;}
+.log-card-type.trigger{color:var(--mid);background:var(--sage-pale);}
+.log-card-type.milestone{color:#2E7D52;background:#E8F5EC;}
 .log-card-date{font-size:11px;color:var(--text-light);}
-.log-card-body{font-size:13px;color:var(--text);line-height:1.5;}
+.log-card-body{font-size:13px;color:var(--text);line-height:1.55;}
+.log-card-category{font-size:12px;font-weight:600;color:var(--mid);margin-bottom:4px;}
 .log-card-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
 .log-card-tag{padding:3px 10px;background:var(--sage-pale);border-radius:10px;font-size:11px;color:var(--mid);}
+.log-card-divider{border:none;border-top:1px solid var(--border);margin:8px 0;}
+.log-card-meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;}
+.log-card-meta-item{font-size:11px;color:var(--text-light);display:flex;align-items:center;gap:4px;}
 .dash-footer{padding:12px 16px 20px;flex-shrink:0;background:var(--warm);border-top:1px solid var(--border);}
-.dash-summary-btn{width:100%;padding:14px;background:var(--deep);color:var(--white);border:none;border-radius:14px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background 0.2s;}
+.dash-summary-btn{width:100%;padding:14px;background:var(--deep);color:var(--white);border:none;border-radius:14px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
 .dash-summary-btn:hover{background:var(--mid);}
 
 /* THERAPIST SUMMARY MODAL */
@@ -529,20 +543,22 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
 <!-- DASHBOARD SCREEN -->
 <div id="dashboard-screen">
   <div class="dash-hdr">
-    <div class="dash-hdr-title">📋 My Logs</div>
     <button class="dash-back" onclick="closeDashboard()">← Back</button>
+    <div class="dash-hdr-title">My Journal</div>
+    <div style="width:60px;"></div>
   </div>
   <div class="dash-body">
     <div class="dash-tabs">
       <div class="dash-tab active" onclick="filterLogs('all',this)">All</div>
-      <div class="dash-tab" onclick="filterLogs('crisis',this)">😤 Crisis</div>
-      <div class="dash-tab" onclick="filterLogs('trigger',this)">📋 Logged</div>
       <div class="dash-tab" onclick="filterLogs('milestone',this)">⭐ Milestones</div>
+      <div class="dash-tab" onclick="filterLogs('trigger',this)">📋 Moments</div>
+      <div class="dash-tab" onclick="filterLogs('crisis',this)">😤 Crisis</div>
     </div>
+    <div class="dash-stats" id="dash-stats"></div>
     <div id="dash-logs-container">
       <div class="dash-empty">
         <div class="dash-empty-icon">📋</div>
-        <div class="dash-empty-text">Loading your logs...</div>
+        <div class="dash-empty-text">Loading your journal...</div>
       </div>
     </div>
   </div>
@@ -741,43 +757,128 @@ window.filterLogs = function(type, el){
   renderLogs(type);
 }
 
+function renderStats(){
+  const statsEl = document.getElementById('dash-stats');
+  if(!statsEl) return;
+  const crisisCount = allLogs.filter(l=>l.type==='crisis').length;
+  const msCount = allLogs.filter(l=>l.type==='milestone').length;
+  const weekAgo = Date.now() - 7*24*60*60*1000;
+  const thisWeek = allLogs.filter(l=>(l.createdAt||0) > weekAgo).length;
+  statsEl.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-num">${allLogs.length}</div>
+      <div class="stat-lbl">Total Logs</div>
+    </div>
+    <div class="stat-card ms-stat">
+      <div class="stat-num">${msCount}</div>
+      <div class="stat-lbl">Milestones</div>
+    </div>
+    <div class="stat-card crisis-stat">
+      <div class="stat-num">${crisisCount}</div>
+      <div class="stat-lbl">Crisis Sessions</div>
+    </div>
+  `;
+}
+
+function formatDate(ts){
+  const d = new Date(ts);
+  const now = new Date();
+  const diffDays = Math.floor((now - d) / (1000*60*60*24));
+  if(diffDays === 0) return 'Today · ' + d.toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit'});
+  if(diffDays === 1) return 'Yesterday · ' + d.toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit'});
+  if(diffDays < 7) return d.toLocaleDateString('en-MY',{weekday:'long'}) + ' · ' + d.toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit'});
+  return d.toLocaleDateString('en-MY',{day:'numeric',month:'short',year:'numeric'});
+}
+
 function renderLogs(filter){
   const container = document.getElementById('dash-logs-container');
   const filtered = filter==='all' ? allLogs : allLogs.filter(l=>l.type===filter);
 
+  renderStats();
+
   if(filtered.length===0){
-    const labels={all:'No logs yet',crisis:'No crisis sessions logged',trigger:'No moments logged',milestone:'No milestones logged'};
-    container.innerHTML=`<div class="dash-empty"><div class="dash-empty-icon">📋</div><div class="dash-empty-text">${labels[filter]||'Nothing here yet'}<br><br>Start chatting to build your log.</div></div>`;
+    const emptyStates = {
+      all:     { icon:'📋', text:'No logs yet', sub:'Start by logging a moment, crisis session, or milestone.' },
+      crisis:  { icon:'😤', text:'No crisis sessions logged', sub:'Crisis conversations are saved here automatically.' },
+      trigger: { icon:'📋', text:'No moments logged yet', sub:'Use Log a Moment to record episodes and triggers.' },
+      milestone:{ icon:'⭐', text:'No milestones yet', sub:'Tap Add a Milestone to celebrate your child\'s wins.' }
+    };
+    const e = emptyStates[filter] || emptyStates.all;
+    container.innerHTML=`
+      <div class="dash-empty">
+        <div class="dash-empty-icon">${e.icon}</div>
+        <div class="dash-empty-text"><strong>${e.text}</strong><br><br>${e.sub}</div>
+      </div>`;
     return;
   }
 
   container.innerHTML = filtered.map(log => {
-    const date = new Date(log.timestamp||log.createdAt).toLocaleDateString('en-MY',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-    const typeLabel = {crisis:'😤 Crisis',trigger:'📋 Log',milestone:'⭐ Milestone',note:'📝 Note'}[log.type]||log.type;
-    const typeClass = log.type||'trigger';
+    const date = formatDate(log.createdAt || new Date(log.timestamp).getTime());
+    const typeClass = log.type || 'trigger';
+
+    const typeLabels = {
+      crisis: '😤 Crisis',
+      trigger: '📋 Logged Moment',
+      milestone: '⭐ Milestone',
+      note: '📝 Note'
+    };
+    const typeLabel = typeLabels[log.type] || log.type;
 
     let body = '';
+    let meta = '';
     let tags = '';
 
-    if(log.type==='crisis'){
-      const turns = (log.data?.conversation||[]).filter(m=>m.role==='user'&&!m.content.includes('CRISIS MODE'));
-      body = turns.length>0 ? `"${turns[0].content.substring(0,120)}${turns[0].content.length>120?'...':''}"` : 'Crisis session';
-    } else if(log.type==='trigger'){
-      const d = log.data||{};
-      body = [d.what,d.time,d.food,d.sleep].filter(Boolean).join(' · ')||'Episode logged';
-      if(d.trigger) tags = d.trigger.split(',').map(t=>`<div class="log-card-tag">${t.trim()}</div>`).join('');
+    if(log.type === 'crisis'){
+      const turns = (log.data?.conversation||[])
+        .filter(m => m.role==='user' && !m.content.includes('CRISIS MODE'));
+      const firstMessage = turns[0]?.content?.substring(0,150) || '';
+      body = firstMessage
+        ? `<div class="log-card-body">${firstMessage}${firstMessage.length >= 150 ? '...' : ''}</div>`
+        : `<div class="log-card-body" style="color:var(--text-light);font-style:italic;">Crisis session recorded</div>`;
+      const turnCount = turns.length;
+      meta = `<div class="log-card-meta"><div class="log-card-meta-item">💬 ${turnCount} message${turnCount!==1?'s':''} exchanged</div></div>`;
+
+    } else if(log.type === 'trigger'){
+      const d = log.data || {};
+      const what = d.what || '';
+      const time = d.time || '';
+      const food = d.food || '';
+      const sleep = d.sleep || '';
+      const trigger = d.trigger || '';
+
+      body = `<div class="log-card-body">${what || 'Episode logged'}</div>`;
+      meta = `<div class="log-card-meta">
+        ${time ? `<div class="log-card-meta-item">🕐 ${time}</div>` : ''}
+        ${food ? `<div class="log-card-meta-item">🍽️ ${food}</div>` : ''}
+        ${sleep ? `<div class="log-card-meta-item">😴 ${sleep}</div>` : ''}
+      </div>`;
+      if(trigger){
+        tags = `<div class="log-card-tags">${trigger.split(',').map(t=>`<div class="log-card-tag">⚡ ${t.trim()}</div>`).join('')}</div>`;
+      }
+
+    } else if(log.type === 'milestone'){
+      const d = log.data || {};
+      const category = d.category || '';
+      const note = d.note || '';
+      body = `
+        ${category ? `<div class="log-card-category">${category}</div>` : ''}
+        <div class="log-card-body">${note || 'Milestone recorded'}</div>
+      `;
+
     } else {
-      body = JSON.stringify(log.data).substring(0,100);
+      body = `<div class="log-card-body" style="color:var(--text-light);">${JSON.stringify(log.data).substring(0,100)}</div>`;
     }
 
-    return `<div class="log-card">
-      <div class="log-card-header">
-        <div class="log-card-type ${typeClass}">${typeLabel}</div>
-        <div class="log-card-date">${date}</div>
-      </div>
-      <div class="log-card-body">${body}</div>
-      ${tags?`<div class="log-card-tags">${tags}</div>`:''}
-    </div>`;
+    return `
+      <div class="log-card">
+        <div class="log-card-header">
+          <div class="log-card-type ${typeClass}">${typeLabel}</div>
+          <div class="log-card-date">${date}</div>
+        </div>
+        ${body}
+        ${meta}
+        ${tags}
+      </div>`;
   }).join('');
 }
 
