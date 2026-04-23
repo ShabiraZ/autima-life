@@ -279,8 +279,13 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
 .summary-section{margin-bottom:20px;}
 .summary-section-title{font-size:11px;font-weight:600;color:var(--mid);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
 .summary-item{font-size:13px;color:var(--text);line-height:1.6;padding:6px 0;border-bottom:1px solid var(--sage-pale);}
-.summary-footer{padding:14px 20px 24px;flex-shrink:0;display:flex;gap:10px;}
-.summary-copy-btn{flex:1;padding:13px;background:var(--deep);color:var(--white);border:none;border-radius:12px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;}
+.summary-footer{padding:14px 20px 24px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;}
+.summary-share-btn{flex:1;padding:13px;background:var(--sage);color:var(--white);border:none;border-radius:12px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background 0.2s;}
+.summary-share-btn:hover{background:var(--mid);}
+.summary-copy-btn{flex:1;padding:13px;background:var(--white);color:var(--deep);border:1.5px solid var(--border);border-radius:12px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background 0.2s;}
+.summary-copy-btn:hover{background:var(--warm);}
+.summary-btn-row{display:flex;gap:8px;}
+.summary-note{font-size:11px;color:var(--text-light);text-align:center;line-height:1.4;}
 .summary-generating{text-align:center;padding:40px;color:var(--text-light);font-size:14px;}
 
 .log-form{display:none;flex-direction:column;flex:1;overflow:hidden;}
@@ -581,7 +586,16 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
       <div class="summary-generating">Generating summary...</div>
     </div>
     <div class="summary-footer">
-      <button class="summary-copy-btn" onclick="copySummary()">📋 Copy to Clipboard</button>
+      <button class="summary-share-btn" id="summary-share-btn" onclick="shareSummary()">
+        📤 Share with Therapist
+      </button>
+      <div class="summary-btn-row">
+        <button class="summary-copy-btn" onclick="copySummary()">📋 Copy Text</button>
+        <button class="summary-copy-btn" onclick="emailSummary()">✉️ Email</button>
+      </div>
+      <div class="summary-note" id="summary-share-note">
+        Share opens WhatsApp, email, or any app on your phone
+      </div>
     </div>
   </div>
 </div>
@@ -975,9 +989,65 @@ window.copySummary = function(){
   if(!summaryText){ alert('Summary not ready yet.'); return; }
   navigator.clipboard.writeText(summaryText).then(()=>{
     const btn = document.querySelector('.summary-copy-btn');
-    btn.textContent = '✅ Copied!';
-    setTimeout(()=>{ btn.textContent = '📋 Copy to Clipboard'; },2000);
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✅ Copied!';
+    setTimeout(()=>{ btn.innerHTML = orig; },2000);
+  }).catch(()=>{
+    // Fallback for browsers that block clipboard
+    const ta = document.createElement('textarea');
+    ta.value = summaryText;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const btn = document.querySelector('.summary-copy-btn');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✅ Copied!';
+    setTimeout(()=>{ btn.innerHTML = orig; },2000);
   });
+}
+
+window.shareSummary = async function(){
+  if(!summaryText){ alert('Summary not ready yet.'); return; }
+
+  const childName = document.getElementById('cname')?.textContent || 'My Child';
+  const date = new Date().toLocaleDateString('en-MY',{day:'numeric',month:'long',year:'numeric'});
+  const shareData = {
+    title: `AutiMa.Life — ${childName} Report`,
+    text: summaryText,
+  };
+
+  // Use native Web Share API if available (works on mobile)
+  if(navigator.share){
+    try{
+      await navigator.share(shareData);
+      // Update note after share
+      document.getElementById('summary-share-note').textContent = '✅ Shared successfully';
+      setTimeout(()=>{
+        document.getElementById('summary-share-note').textContent = 'Share opens WhatsApp, email, or any app on your phone';
+      },3000);
+    } catch(err){
+      if(err.name !== 'AbortError'){
+        // User didn't cancel — fallback to copy
+        window.copySummary();
+      }
+    }
+  } else {
+    // Desktop fallback — copy to clipboard with message
+    window.copySummary();
+    document.getElementById('summary-share-note').textContent = 'Copied — paste into WhatsApp or email to share';
+    setTimeout(()=>{
+      document.getElementById('summary-share-note').textContent = 'Share opens WhatsApp, email, or any app on your phone';
+    },3000);
+  }
+}
+
+window.emailSummary = function(){
+  if(!summaryText){ alert('Summary not ready yet.'); return; }
+  const childName = document.getElementById('cname')?.textContent || 'My Child';
+  const subject = encodeURIComponent(`${childName} — AutiMa.Life Report`);
+  const body = encodeURIComponent(summaryText);
+  window.open(`mailto:?subject=${subject}&body=${body}`);
 }
 
 
