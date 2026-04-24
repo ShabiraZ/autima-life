@@ -99,13 +99,34 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
 .tdots span:nth-child(2){animation-delay:0.2s}.tdots span:nth-child(3){animation-delay:0.4s}
 @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
 
-/* INSIGHT CARD — compact subtle strip */
+/* INSIGHT CARD — home screen */
 .ins-card{margin:0 0 2px;background:rgba(44,62,53,0.06);border:1px solid var(--border);border-radius:12px;padding:10px 14px;flex-shrink:0;display:none;}
 .ins-hdr{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
 .ins-title{font-size:10px;font-weight:600;color:var(--mid);letter-spacing:0.3px;text-transform:uppercase;}
 .ins-badge{margin-left:auto;font-size:9px;color:#A0B5AA;background:rgba(123,158,135,0.1);padding:2px 6px;border-radius:6px;}
 .ins-text{font-size:11px;color:var(--text-light);line-height:1.4;}
 .ins-text strong{color:var(--mid);}
+
+/* PATTERN SECTION in dashboard */
+.pattern-section{margin-bottom:20px;}
+.pattern-section-title{font-size:11px;font-weight:600;color:var(--mid);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.pattern-card{background:linear-gradient(135deg,var(--deep),#1e2e27);border-radius:16px;padding:16px 18px;margin-bottom:8px;}
+.pattern-card-loading{text-align:center;padding:24px;color:var(--text-light);font-size:13px;}
+.pattern-insufficient{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:16px 18px;text-align:center;}
+.pattern-insufficient-icon{font-size:28px;margin-bottom:8px;}
+.pattern-insufficient-text{font-size:13px;color:var(--text-light);line-height:1.5;}
+.pattern-insufficient-count{font-family:'DM Serif Display',serif;font-size:24px;color:var(--deep);margin:8px 0 4px;}
+.pattern-bullet{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px;}
+.pattern-bullet:last-child{margin-bottom:0;}
+.pattern-bullet-text{font-size:13px;color:var(--sage-light);line-height:1.55;}
+.pattern-bullet-text strong{color:var(--white);}
+.pattern-meta{font-size:10px;color:var(--mid);margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);}
+.pattern-trend{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:10px;font-size:11px;font-weight:600;margin-right:6px;}
+.pattern-trend.improving{background:rgba(123,158,135,0.2);color:#A8C4B0;}
+.pattern-trend.worsening{background:rgba(212,149,106,0.2);color:#F2C9A8;}
+.pattern-trend.stable{background:rgba(255,255,255,0.08);color:var(--sage-light);}
+.dash-pattern-btn{width:100%;padding:12px;background:transparent;border:1.5px solid var(--border);border-radius:12px;font-size:13px;font-weight:600;color:var(--mid);font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:8px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.dash-pattern-btn:hover{background:var(--sage-pale);border-color:var(--sage);color:var(--deep);}
 
 /* TRIAGE — compact, less visual weight */
 .triage{padding:0 0 8px;display:none;flex-direction:column;gap:6px;flex-shrink:0;transition:opacity 0.3s,transform 0.3s;}
@@ -477,11 +498,11 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
 
   <div class="ins-card" id="ic">
     <div class="ins-hdr">
-      <span style="font-size:14px;">🔔</span>
-      <div class="ins-title">Pattern Tracking</div>
-      <div class="ins-badge">Coming Soon</div>
+      <span style="font-size:14px;">🔍</span>
+      <div class="ins-title">Pattern Insight</div>
+      <div class="ins-badge" id="ins-badge">Loading...</div>
     </div>
-    <div class="ins-text">AutiMa.Life will detect patterns across sessions and <strong>warn you before triggers strike.</strong></div>
+    <div class="ins-text" id="ins-text">Analysing your recent logs...</div>
   </div>
 
   <div class="triage" id="tri">
@@ -736,8 +757,17 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
       <div class="dash-tab" onclick="filterLogs('milestone',this)">⭐ Milestones</div>
       <div class="dash-tab" onclick="filterLogs('trigger',this)">📋 Moments</div>
       <div class="dash-tab" onclick="filterLogs('crisis',this)">😤 Crisis</div>
+      <div class="dash-tab" onclick="showPatterns(this)">🔍 Patterns</div>
     </div>
     <div class="dash-stats" id="dash-stats"></div>
+    <div id="dash-pattern-section" style="display:none;">
+      <div class="pattern-section">
+        <div class="pattern-section-title">🔍 Detected Patterns</div>
+        <div id="pattern-content">
+          <div class="pattern-card-loading">🌿 Analysing your logs...</div>
+        </div>
+      </div>
+    </div>
     <div id="dash-logs-container">
       <div class="dash-empty">
         <div class="dash-empty-icon">📋</div>
@@ -746,6 +776,9 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
     </div>
   </div>
   <div class="dash-footer">
+    <button class="dash-pattern-btn" id="dash-analyse-btn" onclick="runPatternAnalysis()">
+      🔍 Analyse Patterns
+    </button>
     <button class="dash-summary-btn" onclick="openSummaryModal()">
       📄 Generate Therapist Summary
     </button>
@@ -925,7 +958,9 @@ window.viewLogs = async function(){
     addMsg('ai','Please sign in to view your logs.');
     return;
   }
+  patternLoaded = false; // reset so patterns reload fresh
   document.getElementById('dashboard-screen').style.display='flex';
+  document.getElementById('dashboard-screen').style.flexDirection='column';
   await loadLogs();
 }
 
@@ -1084,6 +1119,177 @@ function renderLogs(filter){
 
 function closeDashboard(){
   document.getElementById('dashboard-screen').style.display='none';
+}
+
+// ── Pattern Detection ──
+let patternData = null;
+let patternLoaded = false;
+
+window.showPatterns = function(tabEl){
+  // Update tabs
+  document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  // Show pattern section, hide logs
+  document.getElementById('dash-pattern-section').style.display = 'block';
+  document.getElementById('dash-logs-container').style.display = 'none';
+  // Load patterns if not already loaded
+  if(!patternLoaded) runPatternAnalysis();
+}
+
+window.filterLogs = function(type, el){
+  currentFilter = type;
+  // Show logs, hide patterns
+  document.getElementById('dash-pattern-section').style.display = 'none';
+  document.getElementById('dash-logs-container').style.display = 'block';
+  document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderLogs(type);
+}
+
+window.runPatternAnalysis = async function(){
+  if(!window.currentUserId) return;
+
+  const btn = document.getElementById('dash-analyse-btn');
+  if(btn){ btn.textContent = '🔍 Analysing...'; btn.disabled = true; }
+
+  document.getElementById('pattern-content').innerHTML =
+    '<div class="pattern-card-loading">🌿 Reading your logs and detecting patterns...</div>';
+  document.getElementById('dash-pattern-section').style.display = 'block';
+  document.getElementById('dash-logs-container').style.display = 'none';
+
+  try {
+    const res = await fetch('/api/detect-patterns', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ userId: window.currentUserId })
+    });
+    const data = await res.json();
+    patternData = data;
+    patternLoaded = true;
+    renderPatterns(data);
+
+    // Also update home screen insight card
+    updateHomeInsightCard(data);
+
+  } catch(e) {
+    document.getElementById('pattern-content').innerHTML =
+      '<div class="pattern-card-loading">Could not analyse patterns. Please try again.</div>';
+  }
+
+  if(btn){ btn.textContent = '🔍 Analyse Patterns'; btn.disabled = false; }
+}
+
+function renderPatterns(data){
+  const container = document.getElementById('pattern-content');
+
+  if(!data.hasPatterns){
+    const needed = data.logsNeeded || 3;
+    container.innerHTML = `
+      <div class="pattern-insufficient">
+        <div class="pattern-insufficient-icon">📊</div>
+        <div class="pattern-insufficient-text">
+          Patterns appear once you have more logs.<br>
+          Keep logging moments and triggers.
+        </div>
+        <div class="pattern-insufficient-count">${needed} more log${needed!==1?'s':''} needed</div>
+        <div style="font-size:12px;color:var(--text-light);">You're building something valuable — every log matters.</div>
+      </div>`;
+    return;
+  }
+
+  const s = data.stats || {};
+  const trendLabel = s.trend === 'improving' ? '↓ Improving' : s.trend === 'worsening' ? '↑ More episodes' : '→ Stable';
+  const trendClass = s.trend || 'stable';
+
+  // Parse narrative bullets
+  const bullets = (data.narrative || '').split('\n').filter(l => l.trim());
+  const bulletsHtml = bullets.map(b => {
+    const formatted = b.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    return `<div class="pattern-bullet"><div class="pattern-bullet-text">${formatted}</div></div>`;
+  }).join('');
+
+  // Stats breakdown
+  const topTrigger = s.topTrigger;
+  const topTime = s.topTime;
+
+  container.innerHTML = `
+    <div class="pattern-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="font-size:11px;color:var(--sage-light);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">AI Pattern Analysis</div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span class="pattern-trend ${trendClass}">${trendLabel}</span>
+        </div>
+      </div>
+      ${bulletsHtml}
+      <div class="pattern-meta">
+        Based on ${data.logCount} logs · ${s.totalEpisodes} episodes · ${s.totalMilestones} milestones
+        · Updated ${new Date(data.analysedAt).toLocaleDateString('en-MY',{day:'numeric',month:'short'})}
+      </div>
+    </div>
+
+    ${topTrigger && topTrigger.pct >= 40 ? `
+    <div class="pattern-card" style="background:linear-gradient(135deg,#2a1e14,#3a2a1c);">
+      <div style="font-size:11px;color:#F2C9A8;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;margin-bottom:8px;">⚡ Primary Trigger</div>
+      <div style="font-size:24px;font-family:'DM Serif Display',serif;color:white;margin-bottom:4px;">${topTrigger.value}</div>
+      <div style="font-size:13px;color:#F2C9A8;">Present in <strong>${topTrigger.pct}%</strong> of logged episodes</div>
+      ${topTime ? `<div style="font-size:12px;color:rgba(242,201,168,0.6);margin-top:6px;">Most common time: ${topTime.value}</div>` : ''}
+    </div>` : ''}
+
+    ${s.hungerPct >= 50 ? `
+    <div style="background:#FFF3E0;border:1px solid #F2C9A8;border-radius:14px;padding:14px 16px;margin-bottom:8px;">
+      <div style="font-size:12px;font-weight:600;color:#7B4B2A;margin-bottom:4px;">🍽️ Hunger Alert</div>
+      <div style="font-size:13px;color:#7B4B2A;">${s.hungerPct}% of episodes had a 3+ hour food gap. Consider setting a meal reminder.</div>
+    </div>` : ''}
+
+    ${s.poorSleepPct >= 50 ? `
+    <div style="background:#F0F4FF;border:1px solid #C5D3F5;border-radius:14px;padding:14px 16px;margin-bottom:8px;">
+      <div style="font-size:12px;font-weight:600;color:#3450A0;margin-bottom:4px;">😴 Sleep Pattern</div>
+      <div style="font-size:13px;color:#3450A0;">${s.poorSleepPct}% of episodes followed poor or broken sleep. Sleep quality appears to be a key factor.</div>
+    </div>` : ''}
+  `;
+}
+
+function updateHomeInsightCard(data){
+  const badge = document.getElementById('ins-badge');
+  const text = document.getElementById('ins-text');
+  if(!badge || !text) return;
+
+  if(!data.hasPatterns){
+    badge.textContent = 'Keep logging';
+    text.innerHTML = `<strong>${data.logsNeeded} more log${data.logsNeeded!==1?'s':''} needed</strong> before patterns appear. Every entry counts.`;
+    return;
+  }
+
+  const s = data.stats || {};
+  const bullets = (data.narrative || '').split('\n').filter(l => l.trim());
+  const firstInsight = bullets[0] || '';
+
+  badge.textContent = `${data.logCount} logs analysed`;
+  badge.style.background = 'rgba(123,158,135,0.2)';
+  badge.style.color = 'var(--sage)';
+  text.innerHTML = firstInsight
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^[🕐🍽️😴⚡📊🔍•\-–]\s*/, '');
+}
+
+// Load patterns quietly on dashboard open
+const _origLoadLogs = window.loadLogs || null;
+async function loadLogsWithPatterns(){
+  if(_origLoadLogs) await _origLoadLogs();
+  // Quietly fetch patterns for home card
+  if(window.currentUserId && allLogs.length >= 3){
+    try {
+      const res = await fetch('/api/detect-patterns', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ userId: window.currentUserId })
+      });
+      const data = await res.json();
+      patternData = data;
+      patternLoaded = true;
+      updateHomeInsightCard(data);
+    } catch(e){ /* silent */ }
+  }
 }
 
 // ── Child Profile ──
