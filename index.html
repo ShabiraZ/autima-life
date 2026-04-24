@@ -259,6 +259,12 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
 /* LOG CARDS */
 .log-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:8px;animation:fadeUp 0.2s ease;transition:box-shadow 0.2s;}
 .log-card:hover{box-shadow:0 4px 16px rgba(44,62,53,0.08);}
+.log-card-actions{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.log-action-btn{padding:5px 12px;border-radius:8px;font-size:11px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;}
+.log-edit-btn{background:var(--sage-pale);border:1px solid var(--border);color:var(--mid);}
+.log-edit-btn:hover{background:var(--sage);color:white;border-color:var(--sage);}
+.log-delete-btn{background:#FFF0F0;border:1px solid #FFCCCC;color:#e53e3e;}
+.log-delete-btn:hover{background:#e53e3e;color:white;border-color:#e53e3e;}
 .log-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
 .log-card-type{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:3px 9px;border-radius:20px;}
 .log-card-type.crisis{color:#B8672E;background:#FFF3E0;}
@@ -899,8 +905,15 @@ function renderLogs(filter){
       body = `<div class="log-card-body" style="color:var(--text-light);">${JSON.stringify(log.data).substring(0,100)}</div>`;
     }
 
+    const canEdit = log.type === 'trigger' || log.type === 'milestone';
+    const actions = canEdit ? `
+      <div class="log-card-actions">
+        <button class="log-action-btn log-edit-btn" onclick="editLog('${log.id}','${log.type}',${JSON.stringify(JSON.stringify(log))})">✏️ Edit</button>
+        <button class="log-action-btn log-delete-btn" onclick="deleteLog('${log.id}')">🗑️ Delete</button>
+      </div>` : '';
+
     return `
-      <div class="log-card">
+      <div class="log-card" id="card-${log.id}">
         <div class="log-card-header">
           <div class="log-card-type ${typeClass}">${typeLabel}</div>
           <div class="log-card-date">${date}</div>
@@ -908,12 +921,127 @@ function renderLogs(filter){
         ${body}
         ${meta}
         ${tags}
+        ${actions}
       </div>`;
   }).join('');
 }
 
 function closeDashboard(){
   document.getElementById('dashboard-screen').style.display='none';
+}
+
+// ── Edit & Delete ──
+let editingLogId = null;
+
+window.deleteLog = async function(logId){
+  if(!confirm('Delete this log entry? This cannot be undone.')) return;
+  if(!window.currentUserId) return;
+  try {
+    const res = await fetch('/api/manage-log', {
+      method: 'DELETE',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ userId: window.currentUserId, logId })
+    });
+    const data = await res.json();
+    if(data.success){
+      // Remove from allLogs array
+      allLogs = allLogs.filter(l => l.id !== logId);
+      // Remove card from DOM instantly
+      const card = document.getElementById('card-' + logId);
+      if(card){ card.style.opacity='0'; card.style.transform='translateX(-10px)'; card.style.transition='all 0.2s ease'; setTimeout(()=>card.remove(), 200); }
+      renderStats();
+    }
+  } catch(e){ alert('Could not delete. Please try again.'); }
+}
+
+window.editLog = function(logId, type, logJson){
+  editingLogId = logId;
+  const log = JSON.parse(logJson);
+  const data = log.data || {};
+
+  if(type === 'trigger'){
+    // Reset chips
+    sel = { what: data.what||null, time: data.time||null, food: data.food||null, sleep: data.sleep||null, trigger: data.trigger||null };
+    document.querySelectorAll('.chip').forEach(c => {
+      c.classList.remove('sel');
+      const txt = c.textContent.trim();
+      // Re-select chips that match saved data
+      if(Object.values(sel).some(v => v && v.includes(txt))) c.classList.add('sel');
+    });
+    // Show log form in edit mode
+    document.getElementById('dashboard-screen').style.display = 'none';
+    document.getElementById('lf').style.display = 'flex';
+    document.getElementById('as').style.display = 'flex';
+    document.getElementById('as').style.flexDirection = 'column';
+    document.getElementById('lb').style.display = 'flex';
+    document.querySelector('.lb-title').textContent = 'Editing a Moment';
+    document.querySelector('.lf-submit').textContent = 'Save Changes →';
+    document.getElementById('chat').style.display = 'none';
+
+  } else if(type === 'milestone'){
+    selectedMsCat = data.category || '';
+    document.querySelectorAll('.ms-cat').forEach(c => {
+      c.classList.toggle('sel', c.textContent.trim() === selectedMsCat);
+    });
+    document.getElementById('ms-note').value = data.note || '';
+    document.getElementById('milestone-modal').classList.add('open');
+    document.querySelector('.ms-save-btn').textContent = 'Save Changes ⭐';
+    document.querySelector('.ms-title').textContent = '✏️ Edit Milestone';
+    document.getElementById('dashboard-screen').style.display = 'none';
+  }
+}
+
+// Override submitLog to handle edits
+const _originalSubmitLog = window.submitLog;
+window.submitLog = function(){
+  if(!editingLogId){ _originalSubmitLog && _originalSubmitLog(); return; }
+  saveEditedLog('trigger');
+}
+
+// Override saveMilestone to handle edits
+const _originalSaveMilestone = window.saveMilestone;
+window.saveMilestone = async function(){
+  if(!editingLogId){ _originalSaveMilestone && _originalSaveMilestone(); return; }
+  await saveEditedLog('milestone');
+}
+
+async function saveEditedLog(type){
+  let newData = {};
+
+  if(type === 'trigger'){
+    const {what,time,food,sleep,trigger} = sel;
+    const filled = [what,time,food,sleep,trigger].filter(v=>v);
+    if(filled.length < 3){ alert('Please select at least 3 fields.'); return; }
+    newData = {what, time, food, sleep, trigger};
+    document.getElementById('lf').style.display = 'none';
+    document.getElementById('chat').style.display = 'flex';
+    document.querySelector('.lb-title').textContent = 'Logging a Moment';
+    document.querySelector('.lf-submit').textContent = 'Analyse This Moment →';
+
+  } else if(type === 'milestone'){
+    const note = document.getElementById('ms-note').value.trim();
+    if(!note && !selectedMsCat){ alert('Please add a description or category.'); return; }
+    newData = { category: selectedMsCat || 'General', note };
+    document.querySelector('.ms-save-btn').textContent = 'Save Milestone ⭐';
+    document.querySelector('.ms-title').textContent = '⭐ Add a Milestone';
+    document.getElementById('milestone-modal').classList.remove('open');
+  }
+
+  try {
+    await fetch('/api/manage-log', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ userId: window.currentUserId, logId: editingLogId, data: newData })
+    });
+    // Update allLogs array
+    const idx = allLogs.findIndex(l => l.id === editingLogId);
+    if(idx > -1) allLogs[idx].data = newData;
+    editingLogId = null;
+    // Reopen dashboard
+    document.getElementById('dashboard-screen').style.display = 'flex';
+    document.getElementById('lb').style.display = 'none';
+    renderLogs(currentFilter);
+  } catch(e){ alert('Could not save changes. Please try again.'); }
 }
 
 // ── Therapist Summary ──
@@ -1749,7 +1877,7 @@ async function saveFCMToken(user) {
     // VAPID key from Firebase Console → Project Settings → Cloud Messaging
     const token = await getToken(messaging, {
       vapidKey: process.env.FIREBASE_VAPID_KEY ||
-        'BPgKtnzTM7XEHn0svK8NeIXGZ9zoQeM8an7-tIp2qG06qSMBcAaQ3wD0x37sLqkjS1nr36XoHqPT9BuIvHnVfz4'
+        'YOUR_VAPID_KEY_HERE'
     });
     if (!token) return;
 
