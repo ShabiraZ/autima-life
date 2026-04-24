@@ -1064,8 +1064,8 @@ function renderLogs(filter){
     const canEdit = log.type === 'trigger' || log.type === 'milestone';
     const actions = canEdit ? `
       <div class="log-card-actions">
-        <button class="log-action-btn log-edit-btn" onclick="editLog('${log.id}','${log.type}',${JSON.stringify(JSON.stringify(log))})">✏️ Edit</button>
-        <button class="log-action-btn log-delete-btn" onclick="deleteLog('${log.id}')">🗑️ Delete</button>
+        <button class="log-action-btn log-edit-btn" onclick="editLog('${log.id}','${log.type}')">✏️ Edit</button>
+        <button class="log-action-btn log-delete-btn" id="del-${log.id}" onclick="confirmDelete('${log.id}')">🗑️ Delete</button>
       </div>` : '';
 
     return `
@@ -1253,60 +1253,118 @@ window.toggleNotifications = async function(){
 // ── Edit & Delete ──
 let editingLogId = null;
 
+window.confirmDelete = function(logId){
+  const btn = document.getElementById('del-' + logId);
+  if(!btn) return;
+
+  // Replace delete button with inline confirm — no blocking dialog
+  const original = btn.outerHTML;
+  btn.outerHTML = `
+    <div id="del-confirm-${logId}" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+      <span style="font-size:12px;color:#e53e3e;font-weight:500;">Delete this log?</span>
+      <button class="log-action-btn log-delete-btn" style="padding:4px 10px;" onclick="window.deleteLog('${logId}')">Yes, delete</button>
+      <button class="log-action-btn log-edit-btn" style="padding:4px 10px;" onclick="cancelDelete('${logId}','${original.replace(/'/g,'\\\'').replace(/"/g,'&quot;')}')">Cancel</button>
+    </div>
+  `;
+}
+
+window.cancelDelete = function(logId, originalHtml){
+  const confirm = document.getElementById('del-confirm-' + logId);
+  if(confirm) confirm.outerHTML = decodeURIComponent(originalHtml);
+}
+
 window.deleteLog = async function(logId){
-  if(!confirm('Delete this log entry? This cannot be undone.')) return;
   if(!window.currentUserId) return;
+  // Remove inline confirm if present
+  const confirm = document.getElementById('del-confirm-' + logId);
+  if(confirm) confirm.remove();
+
+  // Fade out card immediately for responsiveness
+  const card = document.getElementById('card-' + logId);
+  if(card){
+    card.style.transition = 'opacity 0.2s, transform 0.2s';
+    card.style.opacity = '0';
+    card.style.transform = 'translateX(-8px)';
+    setTimeout(() => card.remove(), 200);
+  }
+
   try {
-    const res = await fetch('/api/manage-log', {
+    await fetch('/api/manage-log', {
       method: 'DELETE',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ userId: window.currentUserId, logId })
     });
-    const data = await res.json();
-    if(data.success){
-      // Remove from allLogs array
-      allLogs = allLogs.filter(l => l.id !== logId);
-      // Remove card from DOM instantly
-      const card = document.getElementById('card-' + logId);
-      if(card){ card.style.opacity='0'; card.style.transform='translateX(-10px)'; card.style.transition='all 0.2s ease'; setTimeout(()=>card.remove(), 200); }
-      renderStats();
-    }
-  } catch(e){ alert('Could not delete. Please try again.'); }
+    allLogs = allLogs.filter(l => l.id !== logId);
+    renderStats();
+  } catch(e){
+    // Restore card if delete failed
+    if(card){ card.style.opacity='1'; card.style.transform='none'; }
+    console.error('Delete failed:', e);
+  }
 }
 
-window.editLog = function(logId, type, logJson){
+window.editLog = function(logId, type){
+  // Look up from allLogs array — no fragile inline JSON
+  const log = allLogs.find(l => l.id === logId);
+  if(!log){ console.error('Log not found:', logId); return; }
+
   editingLogId = logId;
-  const log = JSON.parse(logJson);
   const data = log.data || {};
 
   if(type === 'trigger'){
-    // Reset chips
-    sel = { what: data.what||null, time: data.time||null, food: data.food||null, sleep: data.sleep||null, trigger: data.trigger||null };
-    document.querySelectorAll('.chip').forEach(c => {
-      c.classList.remove('sel');
-      const txt = c.textContent.trim();
-      // Re-select chips that match saved data
-      if(Object.values(sel).some(v => v && v.includes(txt))) c.classList.add('sel');
+    // Reset all chips first
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+
+    // Re-select chips matching saved data
+    sel = {
+      what: data.what || null,
+      time: data.time || null,
+      food: data.food || null,
+      sleep: data.sleep || null,
+      trigger: data.trigger || null
+    };
+
+    // Match chips by text content
+    document.querySelectorAll('#chips-what .chip').forEach(c => {
+      if(data.what && c.textContent.trim() === data.what) c.classList.add('sel');
     });
+    document.querySelectorAll('#chips-time .chip').forEach(c => {
+      if(data.time && c.textContent.trim() === data.time) c.classList.add('sel');
+    });
+    document.querySelectorAll('#chips-food .chip').forEach(c => {
+      if(data.food && c.textContent.trim() === data.food) c.classList.add('sel');
+    });
+    document.querySelectorAll('#chips-sleep .chip').forEach(c => {
+      if(data.sleep && c.textContent.trim() === data.sleep) c.classList.add('sel');
+    });
+    // Trigger can be multi-select
+    if(data.trigger){
+      const triggers = data.trigger.split(',').map(t => t.trim());
+      document.querySelectorAll('#chips-trigger .chip').forEach(c => {
+        if(triggers.includes(c.textContent.trim())) c.classList.add('sel');
+      });
+    }
+
     // Show log form in edit mode
     document.getElementById('dashboard-screen').style.display = 'none';
     document.getElementById('lf').style.display = 'flex';
+    document.getElementById('lb').style.display = 'flex';
+    document.getElementById('chat').style.display = 'none';
     document.getElementById('as').style.display = 'flex';
     document.getElementById('as').style.flexDirection = 'column';
-    document.getElementById('lb').style.display = 'flex';
     document.querySelector('.lb-title').textContent = 'Editing a Moment';
     document.querySelector('.lf-submit').textContent = 'Save Changes →';
-    document.getElementById('chat').style.display = 'none';
 
   } else if(type === 'milestone'){
+    // Pre-fill milestone form
     selectedMsCat = data.category || '';
     document.querySelectorAll('.ms-cat').forEach(c => {
       c.classList.toggle('sel', c.textContent.trim() === selectedMsCat);
     });
     document.getElementById('ms-note').value = data.note || '';
-    document.getElementById('milestone-modal').classList.add('open');
     document.querySelector('.ms-save-btn').textContent = 'Save Changes ⭐';
     document.querySelector('.ms-title').textContent = '✏️ Edit Milestone';
+    document.getElementById('milestone-modal').classList.add('open');
     document.getElementById('dashboard-screen').style.display = 'none';
   }
 }
