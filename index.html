@@ -235,6 +235,46 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
 .user-dropdown-item:hover{background:var(--warm);}
 .user-dropdown-item.danger{color:#e53e3e;}
 
+/* PROFILE SETUP SCREEN */
+#profile-screen{position:fixed;inset:0;background:var(--warm);z-index:180;display:none;flex-direction:column;overflow-y:auto;}
+.profile-hdr{background:var(--deep);padding:20px 20px 18px;flex-shrink:0;}
+.profile-hdr-title{font-family:'DM Serif Display',serif;font-size:22px;color:var(--white);margin-bottom:4px;}
+.profile-hdr-sub{font-size:13px;color:var(--sage-light);}
+.profile-body{padding:20px 20px 32px;display:flex;flex-direction:column;gap:20px;max-width:520px;margin:0 auto;width:100%;}
+.profile-field{display:flex;flex-direction:column;gap:7px;}
+.profile-label{font-size:12px;font-weight:600;color:var(--mid);text-transform:uppercase;letter-spacing:0.5px;}
+.profile-label span{font-weight:400;color:#A0B5AA;text-transform:none;font-size:11px;margin-left:4px;}
+.profile-input{width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--white);outline:none;transition:border-color 0.2s;}
+.profile-input:focus{border-color:var(--sage);}
+.profile-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.profile-chip{padding:8px 14px;background:var(--white);border:1.5px solid var(--border);border-radius:20px;font-size:13px;color:var(--mid);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.15s;user-select:none;}
+.profile-chip:hover{border-color:var(--sage);background:var(--sage-pale);}
+.profile-chip.sel{background:var(--deep);border-color:var(--deep);color:white;}
+.profile-save-btn{width:100%;padding:15px;background:var(--deep);color:white;border:none;border-radius:14px;font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background 0.2s;margin-top:8px;}
+.profile-save-btn:hover{background:var(--mid);}
+.profile-skip{text-align:center;font-size:13px;color:var(--text-light);cursor:pointer;padding:8px;}
+.profile-skip:hover{color:var(--mid);}
+.profile-section-title{font-family:'DM Serif Display',serif;font-size:16px;color:var(--deep);padding-bottom:4px;border-bottom:1px solid var(--border);}
+
+/* SETTINGS SCREEN */
+#settings-screen{position:fixed;inset:0;background:var(--warm);z-index:150;display:none;flex-direction:column;}
+.settings-hdr{background:var(--deep);height:54px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.settings-hdr-title{font-family:'DM Serif Display',serif;font-size:18px;color:var(--white);}
+.settings-body{flex:1;overflow-y:auto;padding:16px 20px;}
+.settings-section{margin-bottom:24px;}
+.settings-section-title{font-size:11px;font-weight:600;color:var(--mid);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.settings-item{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.settings-item-left{display:flex;flex-direction:column;gap:2px;}
+.settings-item-label{font-size:14px;font-weight:500;color:var(--deep);}
+.settings-item-sub{font-size:12px;color:var(--text-light);}
+.settings-edit-btn{background:var(--sage-pale);border:1px solid var(--border);color:var(--mid);padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.settings-toggle{width:44px;height:24px;background:#ccc;border-radius:12px;position:relative;cursor:pointer;transition:background 0.2s;border:none;flex-shrink:0;}
+.settings-toggle.on{background:var(--sage);}
+.settings-toggle::after{content:'';position:absolute;width:18px;height:18px;background:white;border-radius:50%;top:3px;left:3px;transition:transform 0.2s;}
+.settings-toggle.on::after{transform:translateX(20px);}
+.settings-danger-btn{width:100%;padding:13px;background:white;border:1.5px solid #FFCCCC;color:#e53e3e;border-radius:12px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background 0.2s;}
+.settings-danger-btn:hover{background:#FFF0F0;}
+
 /* DASHBOARD SCREEN */
 #dashboard-screen{position:fixed;inset:0;background:var(--warm);z-index:150;display:none;flex-direction:column;}
 .dash-hdr{background:var(--deep);height:54px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
@@ -411,7 +451,8 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
         <div class="user-dropdown" id="user-dropdown">
           <div class="user-dropdown-name" id="user-display-name">Parent</div>
           <div class="user-dropdown-email" id="user-display-email"></div>
-          <div class="user-dropdown-item" onclick="viewLogs()">📋 My Logs</div>
+          <div class="user-dropdown-item" onclick="viewLogs()">📋 My Journal</div>
+          <div class="user-dropdown-item" onclick="openSettings()">⚙️ Settings</div>
           <div class="user-dropdown-item danger" onclick="signOut()">Sign Out</div>
         </div>
       </div>
@@ -564,6 +605,121 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
       <div><div class="tri-ttl">Add a Milestone</div><div class="tri-sub">Record a win or progress</div></div>
       <div class="tri-arr">›</div>
     </button>
+  </div>
+</div>
+
+<!-- PROFILE SETUP SCREEN -->
+<div id="profile-screen">
+  <div class="profile-hdr">
+    <div class="profile-hdr-title">Tell us about your child 🌿</div>
+    <div class="profile-hdr-sub">This helps AutiMa personalise your experience</div>
+  </div>
+  <div class="profile-body">
+
+    <div class="profile-field">
+      <div class="profile-label">Child's name <span>*</span></div>
+      <input class="profile-input" id="p-child-name" type="text" placeholder="e.g. Adam" maxlength="50"/>
+    </div>
+
+    <div class="profile-field">
+      <div class="profile-label">Date of birth <span>optional</span></div>
+      <input class="profile-input" id="p-dob" type="date" max="2025-12-31"/>
+    </div>
+
+    <div class="profile-section-title">Diagnosis / Condition</div>
+    <div class="profile-field">
+      <div class="profile-label">Primary diagnosis <span>select one or more</span></div>
+      <div class="profile-chips" id="p-diagnosis-chips">
+        <div class="profile-chip" onclick="toggleProfileChip(this,'diagnosis')">🧩 Autism / ASD</div>
+        <div class="profile-chip" onclick="toggleProfileChip(this,'diagnosis')">⚡ ADHD</div>
+        <div class="profile-chip" onclick="toggleProfileChip(this,'diagnosis')">🧬 Down Syndrome</div>
+        <div class="profile-chip" onclick="toggleProfileChip(this,'diagnosis')">🧠 Cerebral Palsy</div>
+        <div class="profile-chip" onclick="toggleProfileChip(this,'diagnosis')">🗣️ Speech Delay</div>
+        <div class="profile-chip" onclick="toggleProfileChip(this,'diagnosis')">👁️ Sensory Processing</div>
+        <div class="profile-chip" onclick="toggleProfileChip(this,'diagnosis')">📚 Global Dev Delay</div>
+        <div class="profile-chip" onclick="toggleProfileChip(this,'diagnosis')">❓ Other / Undiagnosed</div>
+      </div>
+    </div>
+
+    <div class="profile-section-title">Support Team <span style="font-size:13px;font-weight:400;color:#A0B5AA;">optional</span></div>
+
+    <div class="profile-field">
+      <div class="profile-label">Therapist / specialist name</div>
+      <input class="profile-input" id="p-therapist" type="text" placeholder="e.g. Dr Priya, OT Farah"/>
+    </div>
+
+    <div class="profile-field">
+      <div class="profile-label">School or centre</div>
+      <input class="profile-input" id="p-school" type="text" placeholder="e.g. NASOM Petaling Jaya"/>
+    </div>
+
+    <button class="profile-save-btn" onclick="saveChildProfile()">Save & Get Started →</button>
+    <div class="profile-skip" onclick="skipProfile()">Skip for now — I'll add this later</div>
+
+  </div>
+</div>
+
+<!-- SETTINGS SCREEN -->
+<div id="settings-screen">
+  <div class="settings-hdr">
+    <button class="dash-back" onclick="closeSettings()">← Back</button>
+    <div class="settings-hdr-title">Settings</div>
+    <div style="width:60px;"></div>
+  </div>
+  <div class="settings-body">
+
+    <div class="settings-section">
+      <div class="settings-section-title">Child Profile</div>
+      <div class="settings-item">
+        <div class="settings-item-left">
+          <div class="settings-item-label" id="settings-child-name">Your Child</div>
+          <div class="settings-item-sub" id="settings-diagnosis">No diagnosis added</div>
+        </div>
+        <button class="settings-edit-btn" onclick="openProfileEdit()">Edit</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Support Team</div>
+      <div class="settings-item">
+        <div class="settings-item-left">
+          <div class="settings-item-label">Therapist</div>
+          <div class="settings-item-sub" id="settings-therapist">Not added</div>
+        </div>
+        <button class="settings-edit-btn" onclick="openProfileEdit()">Edit</button>
+      </div>
+      <div class="settings-item">
+        <div class="settings-item-left">
+          <div class="settings-item-label">School / Centre</div>
+          <div class="settings-item-sub" id="settings-school">Not added</div>
+        </div>
+        <button class="settings-edit-btn" onclick="openProfileEdit()">Edit</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Notifications</div>
+      <div class="settings-item">
+        <div class="settings-item-left">
+          <div class="settings-item-label">Daily Reminders</div>
+          <div class="settings-item-sub">Personalised trigger nudges each morning</div>
+        </div>
+        <button class="settings-toggle" id="notif-toggle" onclick="toggleNotifications()"></button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Account</div>
+      <div class="settings-item">
+        <div class="settings-item-left">
+          <div class="settings-item-label" id="settings-parent-name">Parent</div>
+          <div class="settings-item-sub" id="settings-email">—</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="settings-danger-btn" onclick="window.signOut()">Sign Out</button>
+
   </div>
 </div>
 
@@ -928,6 +1084,170 @@ function renderLogs(filter){
 
 function closeDashboard(){
   document.getElementById('dashboard-screen').style.display='none';
+}
+
+// ── Child Profile ──
+let childProfile = {};
+
+window.toggleProfileChip = function(el, group){
+  el.classList.toggle('sel');
+}
+
+function getSelectedDiagnoses(){
+  return [...document.querySelectorAll('#p-diagnosis-chips .profile-chip.sel')]
+    .map(c => c.textContent.trim()).join(', ');
+}
+
+window.saveChildProfile = async function(){
+  const name = document.getElementById('p-child-name').value.trim();
+  if(!name){ alert('Please enter your child\'s name.'); return; }
+
+  const profile = {
+    childName: name,
+    dob: document.getElementById('p-dob').value || null,
+    diagnosis: getSelectedDiagnoses() || null,
+    therapist: document.getElementById('p-therapist').value.trim() || null,
+    school: document.getElementById('p-school').value.trim() || null,
+    profileComplete: true,
+    updatedAt: Date.now()
+  };
+
+  const btn = document.querySelector('.profile-save-btn');
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
+
+  try {
+    // Save to Firestore
+    await fetch('/api/save-fcm-token', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        userId: window.currentUserId,
+        fcmToken: null,
+        childName: name,
+        ...profile
+      })
+    });
+
+    // Save locally
+    childProfile = profile;
+    localStorage.setItem(`profile-${window.currentUserId}`, JSON.stringify(profile));
+    applyProfile(profile);
+    closeProfileScreen();
+    launchAppAfterProfile();
+
+  } catch(e){
+    console.error('Profile save error:', e);
+    applyProfile(profile); // apply even if save fails
+    closeProfileScreen();
+  }
+
+  btn.textContent = 'Save & Get Started →';
+  btn.disabled = false;
+}
+
+window.skipProfile = function(){
+  closeProfileScreen();
+  launchAppAfterProfile();
+}
+
+function closeProfileScreen(){
+  document.getElementById('profile-screen').style.display = 'none';
+  document.getElementById('as').style.display = 'flex';
+  document.getElementById('as').style.flexDirection = 'column';
+}
+
+function applyProfile(profile){
+  if(!profile) return;
+  // Update child name everywhere
+  if(profile.childName){
+    const nameEl = document.getElementById('cname');
+    const initEl = document.getElementById('cinit');
+    if(nameEl) nameEl.textContent = profile.childName;
+    if(initEl) initEl.textContent = profile.childName[0].toUpperCase();
+    window.childName = profile.childName;
+  }
+  // Update settings screen
+  const sName = document.getElementById('settings-child-name');
+  const sDiag = document.getElementById('settings-diagnosis');
+  const sTherapist = document.getElementById('settings-therapist');
+  const sSchool = document.getElementById('settings-school');
+  if(sName) sName.textContent = profile.childName || 'Your Child';
+  if(sDiag) sDiag.textContent = profile.diagnosis || 'No diagnosis added';
+  if(sTherapist) sTherapist.textContent = profile.therapist || 'Not added';
+  if(sSchool) sSchool.textContent = profile.school || 'Not added';
+}
+
+async function loadChildProfile(userId){
+  try {
+    const res = await fetch(`/api/get-logs?userId=${userId}&limit=1`);
+    // Profile is stored on user doc — get it via a dedicated check
+    // For now use localStorage as fast cache
+    const cached = localStorage.getItem(`profile-${userId}`);
+    if(cached){
+      const profile = JSON.parse(cached);
+      childProfile = profile;
+      applyProfile(profile);
+      return profile;
+    }
+    return null;
+  } catch(e){ return null; }
+}
+
+window.openProfileEdit = function(){
+  // Pre-fill form with existing profile
+  if(childProfile.childName) document.getElementById('p-child-name').value = childProfile.childName;
+  if(childProfile.dob) document.getElementById('p-dob').value = childProfile.dob;
+  if(childProfile.therapist) document.getElementById('p-therapist').value = childProfile.therapist;
+  if(childProfile.school) document.getElementById('p-school').value = childProfile.school;
+
+  // Re-select diagnosis chips
+  if(childProfile.diagnosis){
+    document.querySelectorAll('#p-diagnosis-chips .profile-chip').forEach(c => {
+      if(childProfile.diagnosis.includes(c.textContent.trim())) c.classList.add('sel');
+    });
+  }
+  document.getElementById('settings-screen').style.display = 'none';
+  document.getElementById('profile-screen').style.display = 'flex';
+  document.querySelector('.profile-save-btn').textContent = 'Save Changes →';
+}
+
+// ── Settings ──
+window.openSettings = function(){
+  document.getElementById('user-dropdown').classList.remove('open');
+  // Populate settings
+  const sParent = document.getElementById('settings-parent-name');
+  const sEmail = document.getElementById('settings-email');
+  if(sParent) sParent.textContent = window.currentUserDisplayName || 'Parent';
+  if(sEmail) sEmail.textContent = window.currentUserEmail || '—';
+  applyProfile(childProfile);
+  document.getElementById('settings-screen').style.display = 'flex';
+  document.getElementById('settings-screen').style.flexDirection = 'column';
+}
+
+window.closeSettings = function(){
+  document.getElementById('settings-screen').style.display = 'none';
+}
+
+window.toggleNotifications = async function(){
+  const toggle = document.getElementById('notif-toggle');
+  const isOn = toggle.classList.toggle('on');
+  if(isOn){
+    window.enableNotifications && window.enableNotifications();
+  } else {
+    // Disable notifications in Firestore
+    if(window.currentUserId){
+      await fetch('/api/save-fcm-token', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          userId: window.currentUserId,
+          fcmToken: null,
+          notificationsEnabled: false
+        })
+      });
+    }
+  }
 }
 
 // ── Edit & Delete ──
@@ -1635,37 +1955,67 @@ function onUserLoggedIn(user) {
   document.getElementById('user-avatar-btn').textContent = initial;
   document.getElementById('user-display-name').textContent = user.displayName || 'Parent';
   document.getElementById('user-display-email').textContent = user.email;
+  window.currentUserDisplayName = user.displayName || 'Parent';
 
-  // Hide auth screens, show app
+  // Hide auth screens
   document.getElementById('ws').style.display = 'none';
   document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('as').style.display = 'flex';
-  document.getElementById('as').style.flexDirection = 'column';
 
-  // Start app
-  window.setMode('home');
-  const firstName = (user.displayName || 'there').split(' ')[0];
-
-  // Detect new vs returning user based on account creation time
-  const createdAt = new Date(user.metadata.creationTime).getTime();
-  const lastLogin = new Date(user.metadata.lastSignInTime).getTime();
-  const isNewUser = (lastLogin - createdAt) < 10000; // within 10 seconds = new
-
-  if (isNewUser) {
-    window.addMsg('ai', `Hi ${firstName}! Welcome to AutiMa.Life 🌿\n\nI'm here to help you navigate your child's journey — log moments, track triggers, and find calm guidance whenever you need it.\n\nHow can I help you today?`);
-  } else {
-    window.addMsg('ai', `Welcome back, ${firstName} 🌿\n\nI'm here whenever you need me. How can I help today?`);
-  }
-
-  // Expose user id globally for log saving
+  // Expose user id globally
   window.currentUserId = user.uid;
   window.currentUserEmail = user.email;
 
-  // Set up push notifications after login
-  setTimeout(() => setupNotifications(user), 3000);
+  const firstName = (user.displayName || 'there').split(' ')[0];
+  const createdAt = new Date(user.metadata.creationTime).getTime();
+  const lastLogin = new Date(user.metadata.lastSignInTime).getTime();
+  const isNewUser = (lastLogin - createdAt) < 10000;
 
-  // Check for in-app reminder on login
-  setTimeout(() => checkInAppReminder(user.uid), 2000);
+  if (isNewUser) {
+    // New user — show profile setup first
+    document.getElementById('profile-screen').style.display = 'flex';
+    document.getElementById('profile-screen').style.flexDirection = 'column';
+    // App loads after profile is saved/skipped
+    window._pendingFirstName = firstName;
+  } else {
+    // Returning user — load app directly
+    document.getElementById('as').style.display = 'flex';
+    document.getElementById('as').style.flexDirection = 'column';
+    window.setMode('home');
+
+    // Load saved profile
+    const cached = localStorage.getItem(`profile-${user.uid}`);
+    if(cached){
+      const profile = JSON.parse(cached);
+      childProfile = profile;
+      applyProfile(profile);
+      const childFirst = profile.childName ? profile.childName.split(' ')[0] : null;
+      window.addMsg('ai', `Welcome back, ${firstName} 🌿${childFirst ? '\n\nHow is ' + childFirst + ' doing today?' : '\n\nHow can I help today?'}`);
+    } else {
+      window.addMsg('ai', `Welcome back, ${firstName} 🌿\n\nHow can I help today?`);
+    }
+
+    setTimeout(() => setupNotifications(user), 3000);
+    setTimeout(() => checkInAppReminder(user.uid), 2000);
+  }
+}
+
+// Called after profile setup completes (save or skip)
+function launchAppAfterProfile(){
+  const firstName = window._pendingFirstName || 'there';
+  document.getElementById('as').style.display = 'flex';
+  document.getElementById('as').style.flexDirection = 'column';
+  window.setMode('home');
+
+  const childName = childProfile.childName;
+  if(childName){
+    // Save profile to localStorage
+    localStorage.setItem(`profile-${window.currentUserId}`, JSON.stringify(childProfile));
+    window.addMsg('ai', `Hi ${firstName}! Welcome to AutiMa.Life 🌿\n\nI'm here to help you navigate ${childName}'s journey — log moments, track triggers, and get calm guidance whenever you need it.\n\nHow are things going today?`);
+  } else {
+    window.addMsg('ai', `Hi ${firstName}! Welcome to AutiMa.Life 🌿\n\nI'm here whenever you need me. How can I help today?`);
+  }
+
+  setTimeout(() => setupNotifications({ uid: window.currentUserId }), 3000);
 }
 
 // Show auth screen
