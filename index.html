@@ -957,6 +957,15 @@ function startApp(){
   showAuth('signup');
 }
 
+// Global stub — overridden by Firebase module once loaded
+window.showAuth = function(mode){
+  // Will be overridden by Firebase module
+  document.getElementById('ws').style.display = 'none';
+  document.getElementById('as').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('auth-screen').style.flexDirection = 'column';
+}
+
 // ── Guest Mode ──
 const GUEST_EXPIRY_DAYS = 7;
 
@@ -1732,17 +1741,15 @@ window.editLog = function(logId, type){
   }
 }
 
-// Override submitLog to handle edits
-const _originalSubmitLog = window.submitLog;
+// Override submitLog to handle edits — use late binding so original is always found
 window.submitLog = function(){
-  if(!editingLogId){ _originalSubmitLog && _originalSubmitLog(); return; }
+  if(!editingLogId){ submitLogOriginal(); return; }
   saveEditedLog('trigger');
 }
 
-// Override saveMilestone to handle edits
-const _originalSaveMilestone = window.saveMilestone;
+// Override saveMilestone to handle edits — late binding
 window.saveMilestone = async function(){
-  if(!editingLogId){ _originalSaveMilestone && _originalSaveMilestone(); return; }
+  if(!editingLogId){ await saveMilestoneOriginal(); return; }
   await saveEditedLog('milestone');
 }
 
@@ -2097,7 +2104,7 @@ function sc(el,field){
   }
 }
 
-function submitLog(){
+function submitLogOriginal(){
   const {what,time,food,sleep,trigger}=sel;
   const filled=[what,time,food,sleep,trigger].filter(v=>v);
   if(filled.length<3){alert('Please select at least 3 fields to help AutiMa understand what happened.');return;}
@@ -2132,14 +2139,12 @@ Analyse this, name the most likely trigger specifically, give 2-3 prevention ste
 
   msgs.push({role:'user',content:prompt});
 
-  // Save to Firebase if user is logged in
-  if(window.currentUserId){
-    window.saveLog('trigger', {
-      what: what||null, time: time||null,
-      food: food||null, sleep: sleep||null,
-      trigger: trigger||null
-    });
-  }
+  // Save for both guest (in-memory) and registered users (Firestore)
+  window.saveLog('trigger', {
+    what: what||null, time: time||null,
+    food: food||null, sleep: sleep||null,
+    trigger: trigger||null
+  });
 
   callAI();
 }
@@ -2297,7 +2302,7 @@ window.selectMsCat = function(el){
   selectedMsCat = el.textContent.trim();
 }
 
-window.saveMilestone = async function(){
+async function saveMilestoneOriginal(){
   const note = document.getElementById('ms-note').value.trim();
   if(!note && !selectedMsCat){
     alert('Please add a description or select a category.');
@@ -2307,13 +2312,12 @@ window.saveMilestone = async function(){
   btn.textContent = 'Saving...';
   btn.disabled = true;
 
-  if(window.currentUserId){
-    await window.saveLog('milestone',{
-      category: selectedMsCat || 'General',
-      note: note,
-      date: new Date().toLocaleDateString('en-MY',{day:'numeric',month:'long',year:'numeric'})
-    });
-  }
+  // Save for both guest (in-memory) and registered users (Firestore)
+  await window.saveLog('milestone',{
+    category: selectedMsCat || 'General',
+    note: note,
+    date: new Date().toLocaleDateString('en-MY',{day:'numeric',month:'long',year:'numeric'})
+  });
 
   closeMilestone();
   btn.textContent = 'Save Milestone ⭐';
