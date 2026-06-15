@@ -426,7 +426,16 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;color:var(--text);overflo
   <div class="w-bot">
     <button class="w-cta" onclick="showAuth('signup')">I'm Ready — Let's Begin</button>
     <div style="font-size:13px;color:#A0B5AA;text-align:center;">Already have an account? <span style="color:var(--sage);cursor:pointer;font-weight:600;" onclick="showAuth('login')">Sign in</span></div>
-    <div class="w-note" style="margin-top:8px;">AI assistant · Not a medical tool · Always consult your child's therapist</div>
+    <div style="margin:14px 0;display:flex;align-items:center;gap:10px;width:100%;max-width:280px;">
+      <div style="flex:1;height:1px;background:var(--border);"></div>
+      <div style="font-size:11px;color:#C0CEC8;">or</div>
+      <div style="flex:1;height:1px;background:var(--border);"></div>
+    </div>
+    <button onclick="startGuestMode()" style="background:transparent;border:1.5px solid var(--border);color:var(--mid);padding:11px 28px;border-radius:50px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.2s;margin-bottom:14px;">
+      Continue as Guest
+    </button>
+    <div style="font-size:11px;color:#C0CEC8;text-align:center;margin-bottom:12px;">7-day guest access · No account needed · Logs not saved</div>
+    <div class="w-note">AI assistant · Not a medical tool · Always consult your child's therapist</div>
   </div>
 </div>
 
@@ -948,7 +957,48 @@ function startApp(){
   showAuth('signup');
 }
 
-// ── Dashboard ──
+// ── Guest Mode ──
+const GUEST_EXPIRY_DAYS = 7;
+
+function startGuestMode(){
+  const guestStart = localStorage.getItem('guest-start');
+  if(guestStart){
+    const daysSince = (Date.now() - parseInt(guestStart)) / (1000*60*60*24);
+    if(daysSince > GUEST_EXPIRY_DAYS){ showGuestExpired(); return; }
+  } else {
+    localStorage.setItem('guest-start', Date.now().toString());
+  }
+
+  window.currentUserId = null;
+  window.isGuest = true;
+
+  $('ws').style.display='none';
+  const a=$('as'); a.style.display='flex'; a.style.flexDirection='column';
+  setMode('home');
+  showGuestBanner();
+  addMsg('ai',"Hi there 🌿 I'm AutiMa — your AI companion for navigating special needs parenting.\n\nYou're in guest mode — feel free to explore. Create a free account anytime to save your logs and access all features.\n\nHow can I help you today?");
+}
+
+function showGuestBanner(){
+  const b = document.createElement('div');
+  b.id='guest-banner';
+  b.style.cssText='background:#FFF9E6;border-bottom:1px solid #E8D98A;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;font-family:"DM Sans",sans-serif;';
+  b.innerHTML=`
+    <div style="font-size:12px;color:#7A6010;">👋 Guest mode — logs won't be saved</div>
+    <button onclick="showAuth('signup')" style="background:#7A6010;color:white;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Create Free Account</button>
+  `;
+  const hdr=document.getElementById('hdr');
+  if(hdr&&hdr.parentNode) hdr.parentNode.insertBefore(b, hdr.nextSibling);
+}
+
+function showGuestExpired(){
+  $('ws').style.display='flex';
+  const msg=document.createElement('div');
+  msg.style.cssText='background:#FFF3E0;border:1px solid #F2C9A8;border-radius:14px;padding:14px 16px;margin:0 20px 16px;text-align:center;font-family:"DM Sans",sans-serif;font-size:13px;color:#7B4B2A;';
+  msg.innerHTML='<div style="font-weight:600;margin-bottom:4px;">Your 7-day guest access has ended</div><div style="font-size:12px;color:#B8672E;">Create a free account to continue using AutiMa.Life and save your logs.</div>';
+  const wBot=document.querySelector('.w-bot');
+  if(wBot) wBot.parentNode.insertBefore(msg, wBot);
+}
 let allLogs = [];
 let currentFilter = 'all';
 
@@ -2285,7 +2335,12 @@ function launchAppAfterProfile(){
 // Show auth screen
 window.showAuth = function(mode) {
   authMode = mode;
+  // Hide everything including guest app view
   document.getElementById('ws').style.display = 'none';
+  document.getElementById('as').style.display = 'none';
+  const guestBanner = document.getElementById('guest-banner');
+  if(guestBanner) guestBanner.remove();
+  window.isGuest = false;
   document.getElementById('auth-screen').style.display = 'flex';
   document.getElementById('auth-screen').style.flexDirection = 'column';
   updateAuthUI();
