@@ -960,29 +960,25 @@ function startApp(){
 // Global showAuth — works immediately, enhanced by Firebase module
 window.showAuth = function(mode){
   window._pendingAuthMode = mode || 'signup';
-  // Close any open modals
-  const summaryModal = document.getElementById('summary-modal');
-  if(summaryModal) summaryModal.classList.remove('open');
-  const milestoneModal = document.getElementById('milestone-modal');
-  if(milestoneModal) milestoneModal.classList.remove('open');
-  const triageOverlay = document.getElementById('triage-overlay');
-  if(triageOverlay) triageOverlay.classList.remove('open');
-  // Hide all other screens
-  document.getElementById('ws').style.display = 'none';
-  document.getElementById('as').style.display = 'none';
-  const guestBanner = document.getElementById('guest-banner');
-  if(guestBanner) guestBanner.remove();
-  const guestNudge = document.getElementById('guest-nudge');
-  if(guestNudge) guestNudge.remove();
-  const dash = document.getElementById('dashboard-screen');
-  if(dash) dash.style.display = 'none';
-  const settings = document.getElementById('settings-screen');
-  if(settings) settings.style.display = 'none';
+  // Close ALL modals directly via DOM — no function dependencies
+  ['summary-modal','milestone-modal','triage-overlay'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.classList.remove('open');
+  });
+  // Hide all screens
+  ['ws','as','dashboard-screen','settings-screen'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'none';
+  });
+  // Clean up guest UI
+  ['guest-banner','guest-nudge'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.remove();
+  });
   window.isGuest = false;
   // Show auth screen
   const auth = document.getElementById('auth-screen');
-  auth.style.display = 'flex';
-  auth.style.flexDirection = 'column';
+  if(auth){ auth.style.display = 'flex'; auth.style.flexDirection = 'column'; }
 }
 
 // ── Guest Mode ──
@@ -2467,28 +2463,25 @@ function launchAppAfterProfile(){
 // Show auth screen
 window.showAuth = function(mode) {
   authMode = mode || 'signup';
-  // Close any open modals first
-  closeSummaryModal();
-  closeMilestone();
-  closeTriageOverlay();
-  // Hide everything
-  document.getElementById('ws').style.display = 'none';
-  document.getElementById('as').style.display = 'none';
+  // Close ALL modals directly via DOM
+  ['summary-modal','milestone-modal','triage-overlay'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.classList.remove('open');
+  });
+  // Hide all screens
+  ['ws','as','dashboard-screen','settings-screen'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'none';
+  });
   // Clean up guest UI
-  const guestBanner = document.getElementById('guest-banner');
-  if(guestBanner) guestBanner.remove();
-  const guestNudge = document.getElementById('guest-nudge');
-  if(guestNudge) guestNudge.remove();
-  // Hide other screens
-  const dash = document.getElementById('dashboard-screen');
-  if(dash) dash.style.display = 'none';
-  const settings = document.getElementById('settings-screen');
-  if(settings) settings.style.display = 'none';
+  ['guest-banner','guest-nudge'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.remove();
+  });
   window.isGuest = false;
   // Show auth
   const auth = document.getElementById('auth-screen');
-  auth.style.display = 'flex';
-  auth.style.flexDirection = 'column';
+  if(auth){ auth.style.display = 'flex'; auth.style.flexDirection = 'column'; }
   updateAuthUI();
 }
 
