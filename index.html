@@ -1031,13 +1031,17 @@ let currentFilter = 'all';
 
 window.viewLogs = async function(){
   document.getElementById('user-dropdown').classList.remove('open');
-  if(!window.currentUserId){
-    addMsg('ai','Please sign in to view your logs.');
-    return;
-  }
-  patternLoaded = false; // reset so patterns reload fresh
+  patternLoaded = false;
   document.getElementById('dashboard-screen').style.display='flex';
   document.getElementById('dashboard-screen').style.flexDirection='column';
+
+  if(window.isGuest){
+    // Guest uses in-memory logs — no fetch needed
+    renderStats();
+    renderLogs(currentFilter);
+    showGuestSaveNudge('journal');
+    return;
+  }
   await loadLogs();
 }
 
@@ -1198,7 +1202,61 @@ function closeDashboard(){
   document.getElementById('dashboard-screen').style.display='none';
 }
 
-// ── Pattern Detection ──
+// ── Guest utilities ──
+function showGuestSaveNudge(context){
+  // Remove existing nudge first
+  const existing = document.getElementById('guest-nudge');
+  if(existing) existing.remove();
+
+  const messages = {
+    journal: "You're viewing session logs — they'll disappear when you close the app.",
+    patterns: "These patterns are based on your session only.",
+    summary: "This summary won't be saved when you close the app.",
+    save: "Your logs aren't being saved."
+  };
+
+  const nudge = document.createElement('div');
+  nudge.id = 'guest-nudge';
+  nudge.style.cssText = 'background:#FFF9E6;border:1px solid #E8D98A;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:"DM Sans",sans-serif;';
+  nudge.innerHTML = `
+    <div style="font-size:12px;color:#7A6010;line-height:1.4;">
+      🔒 ${messages[context] || messages.save}<br>
+      <span style="font-weight:600;cursor:pointer;text-decoration:underline;" onclick="window.showAuth('signup')">Create a free account to save everything →</span>
+    </div>
+  `;
+
+  // Insert at top of relevant container
+  if(context === 'journal' || context === 'patterns'){
+    const statsEl = document.getElementById('dash-stats');
+    if(statsEl) statsEl.parentNode.insertBefore(nudge, statsEl);
+  } else if(context === 'summary'){
+    const content = document.getElementById('summary-content');
+    if(content) content.parentNode.insertBefore(nudge, content);
+  }
+}
+
+function clientSidePatterns(triggerLogs){
+  const total = triggerLogs.length;
+  if(!total) return {};
+  const timeCount={}, triggerCount={}, foodCount={}, sleepCount={};
+  triggerLogs.forEach(l=>{
+    const d=l.data||{};
+    if(d.time) timeCount[d.time]=(timeCount[d.time]||0)+1;
+    if(d.trigger) d.trigger.split(',').forEach(t=>{ const k=t.trim(); triggerCount[k]=(triggerCount[k]||0)+1; });
+    if(d.food) foodCount[d.food]=(foodCount[d.food]||0)+1;
+    if(d.sleep) sleepCount[d.sleep]=(sleepCount[d.sleep]||0)+1;
+  });
+  function top(obj){ const e=Object.entries(obj); if(!e.length) return null; e.sort((a,b)=>b[1]-a[1]); return {value:e[0][0],count:e[0][1],pct:Math.round(e[0][1]/total*100)}; }
+  const poorSleep = triggerLogs.filter(l=>(l.data?.sleep||'').toLowerCase().includes('poor')||(l.data?.sleep||'').toLowerCase().includes('under')).length;
+  const hunger = triggerLogs.filter(l=>(l.data?.food||'').includes('3+')||(l.data?.trigger||'').toLowerCase().includes('hunger')).length;
+  return {
+    totalEpisodes:total, totalCrisis:allLogs.filter(l=>l.type==='crisis').length,
+    totalMilestones:allLogs.filter(l=>l.type==='milestone').length,
+    trend:'stable', thisWeek:total, lastWeek:0,
+    topTime:top(timeCount), topTrigger:top(triggerCount), topFood:top(foodCount), topSleep:top(sleepCount),
+    poorSleepPct:Math.round(poorSleep/total*100), hungerPct:Math.round(hunger/total*100)
+  };
+}
 let patternData = null;
 let patternLoaded = false;
 
@@ -1224,7 +1282,21 @@ window.filterLogs = function(type, el){
 }
 
 window.runPatternAnalysis = async function(){
-  if(!window.currentUserId) return;
+  if(!window.currentUserId && !window.isGuest) return;
+  // Guests need min 3 in-memory logs
+  if(window.isGuest){
+    if(allLogs.length < 3){
+      document.getElementById('pattern-content').innerHTML =
+        '<div class="pattern-card-loading">Log at least 3 moments to see patterns.</div>';
+      document.getElementById('dash-pattern-section').style.display='block';
+      return;
+    }
+    // Run client-side basic pattern for guest
+    const s = clientSidePatterns(allLogs.filter(l=>l.type==='trigger'));
+    renderPatterns({ hasPatterns: allLogs.length >= 3, stats: s, narrative: null, logCount: allLogs.length, analysedAt: new Date().toISOString() });
+    showGuestSaveNudge('patterns');
+    return;
+  }
 
   const btn = document.getElementById('dash-analyse-btn');
   if(btn){ btn.textContent = '🔍 Analysing...'; btn.disabled = true; }
@@ -1713,6 +1785,7 @@ window.openSummaryModal = async function(){
   document.getElementById('summary-content').innerHTML='<div class="summary-generating">🌿 Generating your summary...</div>';
   summaryText = '';
   await generateSummary();
+  if(window.isGuest) showGuestSaveNudge('summary');
 }
 
 window.closeSummaryModal = function(){
@@ -2500,18 +2573,41 @@ document.addEventListener('click', (e) => {
 
 // Save log to Firestore via Vercel backend
 window.saveLog = async function(type, data) {
-  if (!window.currentUserId) return;
+  const childName = document.getElementById('cname')?.textContent || 'My Child';
+
+  // Guest mode — save to in-memory allLogs only
+  if(window.isGuest || !window.currentUserId){
+    const guestLog = {
+      id: 'guest-' + Date.now(),
+      userId: 'guest',
+      childName,
+      type,
+      data,
+      timestamp: new Date().toISOString(),
+      createdAt: Date.now()
+    };
+    allLogs.unshift(guestLog); // add to front so newest first
+    return;
+  }
+
+  // Registered user — save to Firestore via API
   try {
-    await fetch('/api/save-log', {
+    const res = await fetch('/api/save-log', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId: window.currentUserId,
-        childName: document.getElementById('cname').textContent || 'My Child',
-        type,
-        data
-      })
+      body: JSON.stringify({ userId: window.currentUserId, childName, type, data })
     });
+    const result = await res.json();
+    if(result.logId){
+      // Add to local allLogs so dashboard updates without refetch
+      allLogs.unshift({
+        id: result.logId,
+        userId: window.currentUserId,
+        childName, type, data,
+        timestamp: new Date().toISOString(),
+        createdAt: Date.now()
+      });
+    }
   } catch(e) {
     console.error('Failed to save log:', e);
   }
