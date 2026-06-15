@@ -960,6 +960,13 @@ function startApp(){
 // Global showAuth — works immediately, enhanced by Firebase module
 window.showAuth = function(mode){
   window._pendingAuthMode = mode || 'signup';
+  // Close any open modals
+  const summaryModal = document.getElementById('summary-modal');
+  if(summaryModal) summaryModal.classList.remove('open');
+  const milestoneModal = document.getElementById('milestone-modal');
+  if(milestoneModal) milestoneModal.classList.remove('open');
+  const triageOverlay = document.getElementById('triage-overlay');
+  if(triageOverlay) triageOverlay.classList.remove('open');
   // Hide all other screens
   document.getElementById('ws').style.display = 'none';
   document.getElementById('as').style.display = 'none';
@@ -967,7 +974,6 @@ window.showAuth = function(mode){
   if(guestBanner) guestBanner.remove();
   const guestNudge = document.getElementById('guest-nudge');
   if(guestNudge) guestNudge.remove();
-  // Hide dashboard/settings if open
   const dash = document.getElementById('dashboard-screen');
   if(dash) dash.style.display = 'none';
   const settings = document.getElementById('settings-screen');
@@ -2461,6 +2467,10 @@ function launchAppAfterProfile(){
 // Show auth screen
 window.showAuth = function(mode) {
   authMode = mode || 'signup';
+  // Close any open modals first
+  closeSummaryModal();
+  closeMilestone();
+  closeTriageOverlay();
   // Hide everything
   document.getElementById('ws').style.display = 'none';
   document.getElementById('as').style.display = 'none';
