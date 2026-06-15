@@ -957,13 +957,26 @@ function startApp(){
   showAuth('signup');
 }
 
-// Global stub — overridden by Firebase module once loaded
+// Global showAuth — works immediately, enhanced by Firebase module
 window.showAuth = function(mode){
-  // Will be overridden by Firebase module
+  window._pendingAuthMode = mode || 'signup';
+  // Hide all other screens
   document.getElementById('ws').style.display = 'none';
   document.getElementById('as').style.display = 'none';
-  document.getElementById('auth-screen').style.display = 'flex';
-  document.getElementById('auth-screen').style.flexDirection = 'column';
+  const guestBanner = document.getElementById('guest-banner');
+  if(guestBanner) guestBanner.remove();
+  const guestNudge = document.getElementById('guest-nudge');
+  if(guestNudge) guestNudge.remove();
+  // Hide dashboard/settings if open
+  const dash = document.getElementById('dashboard-screen');
+  if(dash) dash.style.display = 'none';
+  const settings = document.getElementById('settings-screen');
+  if(settings) settings.style.display = 'none';
+  window.isGuest = false;
+  // Show auth screen
+  const auth = document.getElementById('auth-screen');
+  auth.style.display = 'flex';
+  auth.style.flexDirection = 'column';
 }
 
 // ── Guest Mode ──
@@ -1238,7 +1251,7 @@ function showGuestSaveNudge(context){
   nudge.innerHTML = `
     <div style="font-size:12px;color:#7A6010;line-height:1.4;">
       🔒 ${messages[context] || messages.save}<br>
-      <span style="font-weight:600;cursor:pointer;text-decoration:underline;" onclick="window.showAuth('signup')">Create a free account to save everything →</span>
+      <span style="font-weight:600;cursor:pointer;text-decoration:underline;color:#5a3d00;" onclick="showAuth('signup')">Create a free account to save everything →</span>
     </div>
   `;
 
@@ -2058,7 +2071,8 @@ function enterCrisis(){
 }
 
 function exitCrisis(){
-  if(window.currentUserId && msgs.length > 1){
+  // Save for both guest (memory) and registered (Firestore)
+  if(msgs.length > 1){
     const conversation = msgs
       .filter(m=>m.role!=='user'||!m.content.includes('CRISIS MODE ACTIVATED'))
       .map(m=>({ role:m.role, content:m.content }));
@@ -2446,15 +2460,25 @@ function launchAppAfterProfile(){
 
 // Show auth screen
 window.showAuth = function(mode) {
-  authMode = mode;
-  // Hide everything including guest app view
+  authMode = mode || 'signup';
+  // Hide everything
   document.getElementById('ws').style.display = 'none';
   document.getElementById('as').style.display = 'none';
+  // Clean up guest UI
   const guestBanner = document.getElementById('guest-banner');
   if(guestBanner) guestBanner.remove();
+  const guestNudge = document.getElementById('guest-nudge');
+  if(guestNudge) guestNudge.remove();
+  // Hide other screens
+  const dash = document.getElementById('dashboard-screen');
+  if(dash) dash.style.display = 'none';
+  const settings = document.getElementById('settings-screen');
+  if(settings) settings.style.display = 'none';
   window.isGuest = false;
-  document.getElementById('auth-screen').style.display = 'flex';
-  document.getElementById('auth-screen').style.flexDirection = 'column';
+  // Show auth
+  const auth = document.getElementById('auth-screen');
+  auth.style.display = 'flex';
+  auth.style.flexDirection = 'column';
   updateAuthUI();
 }
 
