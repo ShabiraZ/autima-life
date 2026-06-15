@@ -987,7 +987,7 @@ function startGuestMode(){
 
   // Clear user avatar
   const avatarBtn = document.getElementById('user-avatar-btn');
-  if(avatarBtn) avatarBtn.textContent = '?';
+  if(avatarBtn) avatarBtn.textContent = 'G';
 
   // Clear user dropdown
   const dispName = document.getElementById('user-display-name');
@@ -1036,9 +1036,17 @@ window.viewLogs = async function(){
   document.getElementById('dashboard-screen').style.flexDirection='column';
 
   if(window.isGuest){
-    // Guest uses in-memory logs — no fetch needed
+    // Reset to All tab
+    currentFilter = 'all';
+    document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+    const allTab = document.querySelector('.dash-tab');
+    if(allTab) allTab.classList.add('active');
+    // Show logs container, hide pattern section
+    document.getElementById('dash-pattern-section').style.display = 'none';
+    document.getElementById('dash-logs-container').style.display = 'block';
+    // Render with current in-memory logs
     renderStats();
-    renderLogs(currentFilter);
+    renderLogs('all');
     showGuestSaveNudge('journal');
     return;
   }
